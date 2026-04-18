@@ -1,0 +1,8 @@
+{
+  "problem_id": "P-DEMO-001",
+  "name": "Demo minimal",
+  "description": "Problema mínimo para validar contratos EPIC-1",
+  "objectives": [],
+  "constraints": {},
+  "payload": {}
+}

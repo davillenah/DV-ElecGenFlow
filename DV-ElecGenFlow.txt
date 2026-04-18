@@ -1,0 +1,1997 @@
+
+---------------------------------
+aca inicia el documento .pre-commit-config.yaml
+---------------------------------
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.7
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+
+
+---------------------------------
+aca termina el documento .pre-commit-config.yaml
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento CHANGELOG.md
+---------------------------------
+
+# Changelog
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+### Added
+- (placeholder) Elecboard IR v1 (EPIC-2)
+- (placeholder) Rule engine normativo (EPIC-4)
+- (placeholder) pandapower simulation pipeline (EPIC-5)
+
+## [0.2.0] - 2026-04-17
+### Added
+- Núcleo de dominio (DDD): contratos pydantic (DesignProblem, Candidate, Results, Metrics, Constraints, Rules, Artifacts)
+- Engine headless (orquestación stub) + RunManifest reproducible
+- Loader de configuración YAML (default AR) y CLI mínimo
+- Exportador de JSON Schema para contratos
+- Tests unitarios base para validación
+### Changed
+- CI actualizado para ruff/black/mypy/pytest
+- Versión del paquete a 0.2.0
+
+## [0.1.0] - 2026-04-17
+### Added
+- EPIC-0 completado: scaffolding profesional (estructura repo + gobernanza + docs base)
+
+
+---------------------------------
+aca termina el documento CHANGELOG.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento CHECKLIST.md
+---------------------------------
+
+# CHECKLIST ElecGenFlow
+
+## A) Motor generativo y de simulación
+- [x] DesignProblem schema + validación (EPIC-2)
+- [ ] Generador de variantes (EPIC-8)
+- [ ] Rule engine normativo AEA/IEC (EPIC-6)
+- [ ] Evaluator con métricas reales - pandapower (EPIC-7)
+- [ ] Optimizer (ranking / Pareto) (EPIC-9)
+- [ ] Scenario Manager: Comparativa y snapshots (EPIC-10)
+- [x] Reproducibilidad (seed + manifest) (EPIC-2)
+
+## B) Elecboard DSL / IR & Componentes
+- [ ] Librería de componentes comerciales y base de datos (EPIC-4)
+- [ ] Conexiones lógicas y grafo de red (EPIC-3)
+- [ ] Traducción de IR a modelo pandapower (EPIC-3/7)
+- [ ] Cargas reales P/Q y modelado de líneas (EPIC-5)
+- [ ] Soporte Monofásico/Trifásico (EPIC-3/5)
+- [ ] Validaciones de ratings de componentes (EPIC-6)
+
+## C) Cálculos avanzados y Normativa
+- [ ] Caída de tensión AEA (EPIC-6/7)
+- [ ] Ampacidad AEA/IEC parametrizable (EPIC-5/6)
+- [ ] Cortocircuito IEC 60909 (EPIC-7)
+- [ ] Selectividad de protecciones y curvas de disparo (EPIC-13)
+- [ ] Factor de potencia, compensación y THD (EPIC-12)
+- [ ] Integración de sistemas renovables PV/BESS (EPIC-14)
+
+## D) Salida e Integración
+- [ ] Motor de reportes ingenieriles PDF/Excel (EPIC-11)
+- [ ] Exportación de datos brutos JSON/CSV (EPIC-11)
+- [ ] Capa de integración CAD/BIM (IFC/DXF) (EPIC-17)
+
+## E) Software / DevOps
+- [x] Repo scaffold (EPIC-1)
+- [x] CI activo (ruff + black + mypy + pytest + coverage) (EPIC-2)
+- [x] Lint/format/tipado configurados (EPIC-2)
+- [x] Tests + coverage base (EPIC-2)
+- [x] Docs base + ADRs actualizados (EPIC-1/16)
+- [ ] Hardening industrial y optimización de performance (EPIC-15)
+- [ ] Control de acceso (RBAC) y Logs de auditoría (EPIC-18)
+
+
+---------------------------------
+aca termina el documento CHECKLIST.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento CONTRIBUTING.md
+---------------------------------
+
+# Contributing to ElectGenFlow
+
+## Estándares obligatorios
+- Conventional Commits
+- SemVer
+- Tests antes de merge
+- Alineación con normativa eléctrica
+
+## Regla crítica
+No asumir datos eléctricos sin validación explícita.
+
+
+---------------------------------
+aca termina el documento CONTRIBUTING.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento LICENSE
+---------------------------------
+
+MIT License
+
+Copyright (c) 2026
+
+Permission is hereby granted...
+
+
+---------------------------------
+aca termina el documento LICENSE
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento pyproject.toml
+---------------------------------
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "elecgenflow"
+version = "0.2.0"
+description = "EPyengFlow: Generative Design Engine (MT/BT) - core domain contracts and validation"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = { file = "LICENSE" }
+authors = [{ name = "ElecGenFlow Contributors" }]
+keywords = ["electrical", "engineering", "mt", "bt", "pandapower", "ddd", "optimization"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "pandapower>=2.13",
+  "numpy>=1.26",
+  "pandas>=2.2",
+  "scipy>=1.11",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.2",
+  "pyyaml>=6.0",
+  "matplotlib>=3.8",
+  "seaborn>=0.13",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.5",
+  "black>=24.4",
+  "mypy>=1.10",
+  "types-PyYAML>=6.0.12",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+fix = false
+show-fixes = true
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "N", "A", "C4", "T20", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_configs = true
+mypy_path = ["src"]
+exclude = ["^docs/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --disable-warnings --maxfail=1"
+
+[tool.coverage.run]
+branch = true
+source = ["elecgenflow"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_empty = true
+
+
+---------------------------------
+aca termina el documento pyproject.toml
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento ci.yml
+---------------------------------
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Ruff (lint)
+        run: ruff check src tests
+
+      - name: Black (format check)
+        run: black --check src tests
+
+      - name: Mypy (typecheck)
+        run: mypy src
+
+      - name: Pytest (with coverage)
+        run: pytest --cov --cov-report=term-missing
+
+
+---------------------------------
+aca termina el documento ci.yml
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento CACHEDIR.TAG
+---------------------------------
+
+Signature: 8a477f597d28d172789f06886806bc55
+# This file is a cache directory tag created by pytest.
+# For information about cache directory tags, see:
+#	https://bford.info/cachedir/spec.html
+
+
+---------------------------------
+aca termina el documento CACHEDIR.TAG
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento lastfailed
+---------------------------------
+
+{}
+
+---------------------------------
+aca termina el documento lastfailed
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento nodeids
+---------------------------------
+
+[
+  "tests/unit/test_constraints_defaults.py::test_constraints_defaults_are_none_to_avoid_assumptions",
+  "tests/unit/test_design_problem_validation.py::test_design_problem_minimal_ok",
+  "tests/unit/test_design_problem_validation.py::test_design_problem_objectives_all_disabled_invalid",
+  "tests/unit/test_design_problem_validation.py::test_design_problem_objectives_enabled_ok",
+  "tests/unit/test_schema_export.py::test_export_json_schema"
+]
+
+---------------------------------
+aca termina el documento nodeids
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento default_ar.yaml
+---------------------------------
+
+country: AR
+frequency_hz: 50
+voltages:
+  lv: [380, 220]
+  mv: [13200, 33000]
+
+standards:
+  aea_90364: true
+  aea_95403: true
+  iec_backup: true
+
+default_seed: 12345
+deterministic: true
+artifacts_subdir: artifacts
+
+
+---------------------------------
+aca termina el documento default_ar.yaml
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento ROADMAP.md
+---------------------------------
+
+# ROADMAP — elecgenflow
+
+## Releases sugeridas (SemVer pre-1.0)
+- v0.1.0 — EPIC-1: Scaffolding + Governance
+- v0.2.0 — EPIC-2: Domain Core (DDD) + Contracts + Validation
+- v0.3.0 — EPIC-3: Elecboard IR v1 (Logical Model)
+- v0.4.0 — EPIC-4: Component Library & Part Management
+- v0.5.0 — EPIC-5: Real Electrical Model (Lines/Loads)
+- v0.6.0 — EPIC-6: Rule & Constraint Engine (AEA/IEC)
+- v0.7.0 — EPIC-7: Simulation Engine (pandapower) + Metrics
+- v0.8.0 — EPIC-8: Variant Generator
+- v0.9.0 — EPIC-9: Optimizer + Cost Model
+- v0.10.0 — EPIC-10: Scenario Manager (Snapshot & Comparison)
+- v0.11.0 — EPIC-11: Reporting & Exporting Engine (PDF/Excel/JSON)
+- v0.12.0 — EPIC-12: Power Quality (THD/PF)
+- v0.13.0 — EPIC-13: Protection Coordination & Tripping Curves
+- v0.14.0 — EPIC-14: PV/BESS
+- v0.15.0 — EPIC-15: Industrial Hardening
+- v1.0.0 — EPIC-16: Release Candidate + Final Docs
+- v1.1.0 — EPIC-17: Integration Layer (IFC/DXF/JSON Import-Export)
+- v1.2.0 — EPIC-18: RBAC (Role-Based Access Control) & Audit Logs
+
+---------------------------------
+aca termina el documento ROADMAP.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento ADR-0001.md
+---------------------------------
+
+# ADR-0001: Arquitectura elecgenflow
+
+## Estado
+Aceptado
+
+## Decisión
+Se debe establecer la adopción de Domain-Driven Design (DDD) y el patrón Model-View-Presenter (MVP), utilizando pandapower como motor de backend.
+
+## Consecuencias
+Se debe garantizar la estricta separación entre los modelos, la simulación y el reporting.
+
+
+---------------------------------
+aca termina el documento ADR-0001.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento ADR-0002.md
+---------------------------------
+
+# ADR-0002: Reordenamiento del Roadmap por Dependencia de Capas Lógicas
+
+## Estado
+Aceptado
+
+## Decisión
+Se establece la reestructuración obligatoria del roadmap de desarrollo, priorizando la integridad del modelo de datos sobre la ejecución de procesos de cálculo. Se dispone el posicionamiento de la **Librería de Componentes (EPIC-4)** como requisito previo a la construcción del modelo eléctrico real. Asimismo, se determina el aplazamiento consciente del motor de simulación y el sistema de reglas hasta que se garantice la existencia de una base de datos técnica sólida. Se incorporan, de manera mandatoria, capas intermedias de gestión de escenarios, calidad de potencia y coordinación de protecciones antes del lanzamiento de la versión de producción.
+
+## Consecuencias
+Como resultado de esta directriz, se asegura que el motor de simulación (`pandapower`) y el motor de reglas operen exclusivamente sobre entidades con parámetros físicos validados, eliminando la carga manual de datos inconsistentes. Se establece una arquitectura donde la lógica de negocio se apoya en un modelo de información robusto, lo que reduce la necesidad de refactorizaciones futuras en el núcleo del dominio. Finalmente, se garantiza una trazabilidad superior en la comparación de variantes y se eleva el estándar de seguridad técnica requerido para la validación industrial en la versión v1.0.0.
+
+---------------------------------
+aca termina el documento ADR-0002.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento 01_PRODUCT_BACKLOG.md
+---------------------------------
+
+# PRODUCT BACKLOG — elecgenflow
+
+> Nota:
+> Los entregables detallados solo se listan para EPICs completadas
+> o activamente en desarrollo. Las EPICs futuras se describen a nivel
+> de objetivos hasta que entren en ejecución.
+
+## EPIC-1 — Scaffolding profesional + gobernanza
+- Prioridad: Alta
+- Estado: Hecho
+- Release: v0.1.0
+
+## EPIC-2 — Núcleo de dominio (DDD) y contratos del motor
+- Prioridad: Muy Alta
+- Estado: Hecho
+- Release: v0.2.0
+- Entregables:
+  - Contratos pydantic (DesignProblem, Candidate, Constraints, Objectives, Metrics, Rules, Artifacts, Result)
+  - Config loader YAML + defaults AR
+  - RunManifest reproducible
+  - Engine headless stub + CLI mínimo
+  - Tests unitarios base + CI
+
+## EPIC-3 — Elecboard IR v1 (modelo lógico)
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v0.3.0
+
+## EPIC-4 — Component Library & Part Management
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v0.4.0
+- Objetivo: Base de datos de componentes comerciales (cables, protecciones, transformadores) con parámetros técnicos predefinidos.
+
+## EPIC-5 — Modelo eléctrico real (líneas y cargas)
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v0.5.0
+
+## EPIC-6 — Rule & Constraint Engine (AEA/IEC)
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v0.6.0
+
+## EPIC-7 — Simulation Engine (pandapower) + métricas
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v0.7.0
+
+## EPIC-8 — Generador de variantes
+- Prioridad: Media
+- Estado: Pendiente
+- Release: v0.8.0
+
+## EPIC-9 — Optimizador + Cost Model
+- Prioridad: Media
+- Estado: Pendiente
+- Release: v0.9.0
+
+## EPIC-10 — Scenario Manager (Snapshot & Comparison)
+- Prioridad: Media
+- Estado: Pendiente
+- Release: v0.10.0
+- Objetivo: Persistencia y comparación técnica entre diferentes variantes y estados de red.
+
+## EPIC-11 — Reporting & Exporting Engine (PDF/Excel/JSON)
+- Prioridad: Media
+- Estado: Pendiente
+- Release: v0.11.0
+- Objetivo: Generación automatizada de reportes de ingeniería y exportación de datos brutos.
+
+## EPIC-12 — Calidad de energía (THD/PF)
+- Prioridad: Media
+- Estado: Pendiente
+- Release: v0.12.0
+
+## EPIC-13 — Protection Coordination & Tripping Curves
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v0.13.0
+- Objetivo: Estudio de selectividad y curvas de disparo para interruptores.
+
+## EPIC-14 — PV/BESS
+- Prioridad: Baja
+- Estado: Pendiente
+- Release: v0.14.0
+
+## EPIC-15 — Industrial Hardening
+- Prioridad: Media
+- Estado: Pendiente
+- Release: v0.15.0
+
+## EPIC-16 — Release Candidate + docs finales
+- Prioridad: Alta
+- Estado: Pendiente
+- Release: v1.0.0
+
+## EPIC-17 — Integration Layer (IFC/DXF/JSON)
+- Prioridad: Baja
+- Estado: Pendiente
+- Release: v1.1.0
+
+## EPIC-18 — RBAC (Role-Based Access Control) & Audit Logs
+- Prioridad: Baja
+- Estado: Pendiente
+- Release: v1.2.0
+
+---------------------------------
+aca termina el documento 01_PRODUCT_BACKLOG.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento 02_SPRINT_BACKLOG.md
+---------------------------------
+
+# SPRINT BACKLOG
+
+Sprint EPIC-1: cerrado.
+WIP: 0
+
+
+---------------------------------
+aca termina el documento 02_SPRINT_BACKLOG.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento 03_ISSUE_LOG.md
+---------------------------------
+
+# ISSUE LOG
+
+Sin incidencias registradas en EPIC-1.
+
+
+---------------------------------
+aca termina el documento 03_ISSUE_LOG.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento 04_COMMIT_LOG.md
+---------------------------------
+
+# COMMIT LOG (propuesto)
+
+- feat(domain): add core domain contracts and validation (EPIC-1)
+- feat(core): add engine orchestration stubs and run manifest
+- feat(cli): add minimal headless CLI entrypoint
+- test(domain): add unit tests for validation
+- ci: run ruff/black/mypy/pytest in workflow
+- docs: add roadmap and specs for EPIC-1
+- chore: bump version to 0.2.0
+
+
+---------------------------------
+aca termina el documento 04_COMMIT_LOG.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento 05_RELEASE_LOG.md
+---------------------------------
+
+# RELEASE LOG
+
+## v0.1.0
+- EPIC-0: scaffolding profesional + gobernanza
+
+## v0.2.0
+- EPIC-1: contratos dominio + validación + manifest + CLI mínimo + CI QA
+
+
+---------------------------------
+aca termina el documento 05_RELEASE_LOG.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento 06_MERGE_REQUEST.md
+---------------------------------
+
+# Merge Request / Pull Request Template — elecgenflow
+
+## Descripción
+(Qué cambia y por qué)
+
+## Tipo (Conventional Commits)
+- [ ] feat
+- [ ] fix
+- [ ] refactor
+- [ ] docs
+- [ ] test
+- [ ] chore
+- [ ] perf
+- [ ] build
+- [ ] ci
+- [ ] wip
+
+## Checklist (DoD)
+- [ ] CI verde (ruff + black + mypy + pytest + coverage)
+- [ ] CHANGELOG actualizado
+- [ ] CHECKLIST actualizado
+- [ ] BACKLOG actualizado
+- [ ] ADR agregado/actualizado si aplica
+- [ ] No se asumieron datos eléctricos críticos sin declarar
+
+
+---------------------------------
+aca termina el documento 06_MERGE_REQUEST.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento CostModel.md
+---------------------------------
+
+# CostModel (documental)
+
+- La **EPIC-2 (Domain Core)** define únicamente los contratos y la estructura de datos para el modelo de costos, pero no incluye lógica de cálculo.
+- La implementación funcional del modelo de costos (materiales, protecciones, cableado y penalizaciones por incumplimiento técnico) se ejecuta en la **EPIC-9 (Optimizer + Cost Model)**.
+
+
+---------------------------------
+aca termina el documento CostModel.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento DesignProblem.md
+---------------------------------
+
+# DesignProblem (EPIC-2)
+
+## Objetivo
+Definir el contrato de entrada del motor sin asumir datos eléctricos críticos.
+
+## Principios
+- No se asumen parámetros como Icc, esquemas de conexión (TT/TN/IT), longitudes, métodos de instalación, temperatura o resistividad del suelo.
+- El detalle técnico se incorpora de forma incremental en la **EPIC-3 (Elecboard IR)** y la **EPIC-5 (Modelo Eléctrico)**.
+
+## Campos
+- `problem_id`, `name`, `description`
+- `locale` (AR por defecto)
+- `standards` (AEA/IEC declarativo)
+- `seed` (reproducibilidad)
+- `objectives` / `constraints` (opcionales, no se asumen por defecto)
+- `payload` (extensión: IRs, requirements, etc.)
+
+
+---------------------------------
+aca termina el documento DesignProblem.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento Metrics.md
+---------------------------------
+
+# Metrics (EPIC-2)
+
+EPIC-2 define:
+- `MetricValue` y `MetricsBundle`.
+
+Las métricas eléctricas reales se implementan en las fases de simulación y calidad de energía: **EPIC-7** y **EPIC-12**.
+
+
+---------------------------------
+aca termina el documento Metrics.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento ReleaseProcess.md
+---------------------------------
+
+# Release Process
+
+- Conventional Commits obligatorio
+- Keep a Changelog
+- SemVer estricto
+
+Criterio mínimo para release:
+- CI verde (ruff + black + mypy + pytest + coverage)
+- CHANGELOG actualizado
+- CHECKLIST coherente
+- BACKLOG actualizado
+
+
+---------------------------------
+aca termina el documento ReleaseProcess.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento ReportFormat.md
+---------------------------------
+
+# Report Format (EPIC-2)
+
+EPIC-2 define ReportArtifacts:
+- Artefactos por tipo (markdown/json/csv/imagen)
+- Referencia por path o contenido embebido
+
+Reporting ingenieril completo se implementa en **EPIC-11**.
+
+
+---------------------------------
+aca termina el documento ReportFormat.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento Rules.md
+---------------------------------
+
+# Rules (EPIC-2)
+
+EPIC-2 solo define estructuras:
+- `RuleResult`, `RuleReference`, severidades y trazabilidad.
+
+La implementación de reglas normativas (AEA/IEC) inicia en **EPIC-6**.
+
+
+---------------------------------
+aca termina el documento Rules.md
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento problem_minimal.json
+---------------------------------
+
+{
+  "problem_id": "P-DEMO-001",
+  "name": "Demo minimal",
+  "description": "Problema mínimo para validar contratos EPIC-1",
+  "objectives": [],
+  "constraints": {},
+  "payload": {}
+}
+
+
+---------------------------------
+aca termina el documento problem_minimal.json
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento engine_result.json
+---------------------------------
+
+{
+  "problem_id": "P-DEMO-001",
+  "status": "partial",
+  "message": "EPIC-1: contratos y validación listos. Pipeline generativo/simulación/reglas se implementa en EPIC-2..EPIC-8.",
+  "candidates": [
+    {
+      "created_utc": "2026-04-18T18:30:52.505137+00:00",
+      "tags": {
+        "problem_name": "Demo minimal"
+      },
+      "meta": {},
+      "candidate_id": "CAND-0001",
+      "problem_id": "P-DEMO-001",
+      "status": "new",
+      "logical_ir": {},
+      "electrical_ir": {},
+      "rule_results": [],
+      "simulation": {},
+      "metrics": {
+        "values": []
+      },
+      "reports": {
+        "artifacts": []
+      }
+    }
+  ],
+  "artifacts": {
+    "run_manifest": "out/artifacts/run_manifest.json",
+    "engine_result": "out/artifacts/engine_result.json"
+  }
+}
+
+---------------------------------
+aca termina el documento engine_result.json
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento run_manifest.json
+---------------------------------
+
+{
+  "engine_version": "0.2.0",
+  "created_utc": "2026-04-18T18:30:52.501631+00:00",
+  "seed": 12345,
+  "config_sha256": "5946528659919f47aa09554a127c9c25f99b72185dbc9a8e1e1d94aa54825e32",
+  "problem_sha256": "0d26d704f06d29c98945f331607a4cca14fcd0c52e848fe153b7c5c66f9c3b09",
+  "notes": {}
+}
+
+---------------------------------
+aca termina el documento run_manifest.json
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""elecgenflow package root.
+
+elecgenflow is a headless Generative Design Engine for MT/BT electrical engineering.
+Core contracts and validation live in elecgenflow.domain.
+"""
+
+from __future__ import annotations
+
+__all__ = ["__version__"]
+
+__version__ = "0.2.0"
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __main__.py
+---------------------------------
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+from elecgenflow.core.config import load_config
+from elecgenflow.core.engine import Engine
+from elecgenflow.domain.contracts.problem import DesignProblem
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="elecgenflow", description="elecgenflow headless engine")
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="configs/default_ar.yaml",
+        help="Path to engine config YAML (default: configs/default_ar.yaml)",
+    )
+    parser.add_argument("--problem", type=str, help="Path to DesignProblem JSON file")
+    parser.add_argument("--out", type=str, default="out", help="Output folder for artifacts")
+    args = parser.parse_args()
+
+    cfg = load_config(Path(args.config))
+    engine = Engine(cfg)
+
+    if not args.problem:
+        print("No --problem provided. (EPIC-1) CLI only validates config + contracts.")
+        return 0
+
+    problem_json = Path(args.problem).read_text(encoding="utf-8")
+    problem = DesignProblem.model_validate_json(problem_json)
+
+    result = engine.run(problem, out_dir=Path(args.out))
+    print(json.dumps(result.model_dump(mode="json"), indent=2, ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+---------------------------------
+aca termina el documento __main__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento init.py
+---------------------------------
+
+"""Compatibility module required by repository spec.
+
+Prefer importing from elecgenflow directly.
+"""
+
+from __future__ import annotations
+
+from . import __version__  # re-export
+
+
+---------------------------------
+aca termina el documento init.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""Core layer: configuration, engine orchestration, logging, reproducibility."""
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento config.py
+---------------------------------
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Literal
+
+import yaml
+from pydantic import BaseModel, Field, ValidationError
+
+
+class StandardsConfig(BaseModel):
+    aea_90364: bool = True
+    aea_95403: bool = True
+    iec_backup: bool = True
+
+
+class VoltageConfig(BaseModel):
+    lv: list[int] = Field(default_factory=lambda: [380, 220])
+    mv: list[int] = Field(default_factory=lambda: [13200, 33000])
+
+
+class EngineConfig(BaseModel):
+    """Configuración global del motor (defaults AR + flags).
+
+    Nota: no reemplaza datos eléctricos de proyecto.
+    """
+
+    country: Literal["AR"] = "AR"
+    frequency_hz: int = 50
+    voltages: VoltageConfig = Field(default_factory=VoltageConfig)
+    standards: StandardsConfig = Field(default_factory=StandardsConfig)
+
+    default_seed: int = 12345
+    deterministic: bool = True
+
+    artifacts_subdir: str = "artifacts"
+
+
+def load_config(path: Path) -> EngineConfig:
+    if not path.exists():
+        raise FileNotFoundError(f"Config no encontrada: {path}")
+
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    try:
+        return EngineConfig.model_validate(data)
+    except ValidationError as exc:
+        raise ValueError(f"Config inválida: {exc}") from exc
+
+
+---------------------------------
+aca termina el documento config.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento engine.py
+---------------------------------
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+from pydantic import BaseModel, ConfigDict
+
+from elecgenflow.core.config import EngineConfig
+from elecgenflow.core.logging import configure_logging
+from elecgenflow.core.manifest import RunManifest
+from elecgenflow.domain.contracts.candidate import DesignCandidate
+from elecgenflow.domain.contracts.problem import DesignProblem
+from elecgenflow.domain.contracts.results import EngineResult
+from elecgenflow.domain.services.contracts import (
+    CandidateGenerator,
+    Evaluator,
+    Optimizer,
+    RuleEngine,
+    SimulationEngine,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class EngineServices(BaseModel):
+    """Inyección de dependencias (services) para DDD/MVP.
+
+    EPIC-1 provee implementaciones stub.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    generator: CandidateGenerator
+    rule_engine: RuleEngine
+    simulator: SimulationEngine
+    evaluator: Evaluator
+    optimizer: Optimizer
+
+
+class Engine:
+    """Orquestador headless del motor (Presenter).
+
+    En EPIC-1 el pipeline es stub y se centra en contratos + trazabilidad.
+    """
+
+    def __init__(self, config: EngineConfig, services: EngineServices | None = None) -> None:
+        self.config = config
+        configure_logging()
+        self.services = services or EngineServices(
+            generator=CandidateGenerator.stub(),
+            rule_engine=RuleEngine.stub(),
+            simulator=SimulationEngine.stub(),
+            evaluator=Evaluator.stub(),
+            optimizer=Optimizer.stub(),
+        )
+
+    def run(self, problem: DesignProblem, out_dir: Path) -> EngineResult:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        artifacts_dir = out_dir / self.config.artifacts_subdir
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+        logger.info("Engine run started")
+        logger.info(f"Problem id={problem.problem_id} locale={problem.locale} standards={problem.standards}")
+
+        config_path = Path("configs/default_ar.yaml")
+        config_text = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
+        problem_text = problem.model_dump_json(indent=2)
+
+        seed = problem.seed if problem.seed is not None else self.config.default_seed
+        manifest = RunManifest.create(seed=seed, config_text=config_text, problem_text=problem_text)
+        manifest.write(artifacts_dir / "run_manifest.json")
+
+        candidate = DesignCandidate.from_problem(problem, candidate_id="CAND-0001")
+
+        result = EngineResult(
+            problem_id=problem.problem_id,
+            status="partial",
+            message=(
+                "EPIC-1: contratos y validación listos. "
+                "Pipeline generativo/simulación/reglas se implementa en EPIC-2..EPIC-8."
+            ),
+            candidates=[candidate],
+            artifacts={
+                "run_manifest": str((artifacts_dir / "run_manifest.json").as_posix()),
+                "engine_result": str((artifacts_dir / "engine_result.json").as_posix()),
+            },
+        )
+
+        (artifacts_dir / "engine_result.json").write_text(result.model_dump_json(indent=2), encoding="utf-8")
+        logger.info("Engine run completed (partial)")
+        return result
+
+
+---------------------------------
+aca termina el documento engine.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento logging.py
+---------------------------------
+
+from __future__ import annotations
+
+import json
+import logging
+from datetime import datetime, timezone
+from typing import Any
+
+
+class JsonFormatter(logging.Formatter):
+    """Logging estructurado (JSON) para trazabilidad."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        payload: dict[str, Any] = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "msg": record.getMessage(),
+        }
+        if record.exc_info:
+            payload["exc_info"] = self.formatException(record.exc_info)
+        return json.dumps(payload, ensure_ascii=False)
+
+
+def configure_logging(level: int = logging.INFO) -> None:
+    root = logging.getLogger()
+    root.setLevel(level)
+
+    for h in list(root.handlers):
+        root.removeHandler(h)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(JsonFormatter())
+    root.addHandler(handler)
+
+
+---------------------------------
+aca termina el documento logging.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento manifest.py
+---------------------------------
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
+from hashlib import sha256
+from pathlib import Path
+from typing import Any
+
+from elecgenflow import __version__
+
+
+def _sha256_text(text: str) -> str:
+    return sha256(text.encode("utf-8")).hexdigest()
+
+
+@dataclass(frozen=True)
+class RunManifest:
+    """Manifest de ejecución para reproducibilidad."""
+
+    engine_version: str
+    created_utc: str
+    seed: int
+    config_sha256: str
+    problem_sha256: str
+    notes: dict[str, Any] = field(default_factory=dict)
+
+    @staticmethod
+    def create(seed: int, config_text: str, problem_text: str, notes: dict[str, Any] | None = None) -> "RunManifest":
+        return RunManifest(
+            engine_version=__version__,
+            created_utc=datetime.now(timezone.utc).isoformat(),
+            seed=seed,
+            config_sha256=_sha256_text(config_text),
+            problem_sha256=_sha256_text(problem_text),
+            notes=notes or {},
+        )
+
+    def to_json(self) -> str:
+        import json
+        return json.dumps(asdict(self), indent=2, ensure_ascii=False)
+
+    def write(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(self.to_json(), encoding="utf-8")
+
+
+---------------------------------
+aca termina el documento manifest.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""Domain layer (DDD): contracts and invariants."""
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""Contracts: DesignProblem, candidates, metrics, constraints, rule results, artifacts, engine results."""
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento artifacts.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class ReportArtifact(BaseModel):
+    kind: str = Field(description="Ej: markdown, json, csv, image")
+    path: str | None = None
+    content: str | None = None
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class ReportArtifacts(BaseModel):
+    artifacts: list[ReportArtifact] = Field(default_factory=list)
+
+
+---------------------------------
+aca termina el documento artifacts.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento candidate.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Any, Literal
+
+from pydantic import Field
+
+from elecgenflow.domain.contracts.artifacts import ReportArtifacts
+from elecgenflow.domain.contracts.common import TraceableModel
+from elecgenflow.domain.contracts.metrics import MetricsBundle
+from elecgenflow.domain.contracts.problem import DesignProblem
+from elecgenflow.domain.contracts.rules import RuleResult
+
+
+CandidateStatus = Literal["new", "rejected", "simulated", "evaluated", "ranked"]
+
+
+class DesignCandidate(TraceableModel):
+    candidate_id: str
+    problem_id: str
+    status: CandidateStatus = "new"
+
+    logical_ir: dict[str, Any] = Field(default_factory=dict)
+    electrical_ir: dict[str, Any] = Field(default_factory=dict)
+
+    rule_results: list[RuleResult] = Field(default_factory=list)
+    simulation: dict[str, Any] = Field(default_factory=dict)
+    metrics: MetricsBundle = Field(default_factory=MetricsBundle)
+    reports: ReportArtifacts = Field(default_factory=ReportArtifacts)
+
+    @staticmethod
+    def from_problem(problem: DesignProblem, candidate_id: str) -> "DesignCandidate":
+        return DesignCandidate(
+            candidate_id=candidate_id,
+            problem_id=problem.problem_id,
+            status="new",
+            logical_ir=problem.payload.get("logical_ir", {}),
+            electrical_ir=problem.payload.get("electrical_ir", {}),
+            tags={"problem_name": problem.name},
+        )
+
+
+---------------------------------
+aca termina el documento candidate.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento common.py
+---------------------------------
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+class TraceableModel(BaseModel):
+    created_utc: str = Field(default_factory=utc_now_iso)
+    tags: dict[str, str] = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+---------------------------------
+aca termina el documento common.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento constraints.py
+---------------------------------
+
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+
+class ConstraintSet(BaseModel):
+    """Restricciones del problema.
+
+    Defaults en None para evitar suposiciones técnicas.
+    """
+
+    max_voltage_drop_pct: float | None = Field(default=None, ge=0.0, le=100.0)
+    max_line_loading_pct: float | None = Field(default=None, ge=0.0, le=300.0)
+    max_transformer_loading_pct: float | None = Field(default=None, ge=0.0, le=300.0)
+    max_thd_v_pct: float | None = Field(default=None, ge=0.0, le=100.0)
+    min_power_factor: float | None = Field(default=None, ge=0.0, le=1.0)
+
+    max_ground_resistance_ohm: float | None = Field(default=None, ge=0.0)
+
+    notes: str | None = None
+
+
+---------------------------------
+aca termina el documento constraints.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento metrics.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class MetricValue(BaseModel):
+    name: str
+    value: float
+    unit: str | None = None
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class MetricsBundle(BaseModel):
+    values: list[MetricValue] = Field(default_factory=list)
+
+    def get(self, name: str) -> MetricValue | None:
+        for m in self.values:
+            if m.name == name:
+                return m
+        return None
+
+
+---------------------------------
+aca termina el documento metrics.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento objectives.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+ObjectiveName = Literal[
+    "min_cost",
+    "min_voltage_drop",
+    "min_losses",
+    "min_thd",
+    "max_protection_margin",
+    "min_device_count",
+]
+
+
+class ObjectiveSpec(BaseModel):
+    name: ObjectiveName
+    weight: float = Field(default=1.0, ge=0.0)
+    enabled: bool = True
+
+
+---------------------------------
+aca termina el documento objectives.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento problem.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field, model_validator
+
+from elecgenflow.domain.contracts.constraints import ConstraintSet
+from elecgenflow.domain.contracts.objectives import ObjectiveSpec
+from elecgenflow.domain.value_objects.locale import LocaleSpec
+from elecgenflow.domain.value_objects.standards import StandardsRef
+
+
+class DesignProblem(BaseModel):
+    """Entrada principal del motor (EPIC-1).
+
+    Regla estricta: no asumir datos eléctricos críticos.
+    Los detalles técnicos entran vía payload o modelos de EPIC-2/3+.
+    """
+
+    problem_id: str = Field(description="ID único del problema")
+    name: str
+    description: str | None = None
+
+    locale: LocaleSpec = Field(default_factory=LocaleSpec)
+    standards: StandardsRef = Field(default_factory=StandardsRef)
+
+    seed: int | None = Field(default=None, ge=0, description="Seed para reproducibilidad")
+
+    objectives: list[ObjectiveSpec] = Field(default_factory=list)
+    constraints: ConstraintSet = Field(default_factory=ConstraintSet)
+
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _validate_objectives(self) -> "DesignProblem":
+        if self.objectives:
+            enabled = [o for o in self.objectives if o.enabled and o.weight > 0]
+            if not enabled:
+                raise ValueError("Si objectives se proveen, al menos uno debe estar enabled con weight>0.")
+        return self
+
+
+---------------------------------
+aca termina el documento problem.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento results.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
+
+from elecgenflow.domain.contracts.candidate import DesignCandidate
+
+
+EngineStatus = Literal["ok", "partial", "failed"]
+
+
+class EngineResult(BaseModel):
+    problem_id: str
+    status: EngineStatus
+    message: str
+    candidates: list[DesignCandidate] = Field(default_factory=list)
+    artifacts: dict[str, Any] = Field(default_factory=dict)
+
+
+---------------------------------
+aca termina el documento results.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento rules.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+Severity = Literal["info", "warning", "error"]
+
+
+class RuleReference(BaseModel):
+    code: str = Field(description="Referencia normativa o ID interno (ej. AEA90364-... )")
+    url: str | None = None
+    notes: str | None = None
+
+
+class RuleResult(BaseModel):
+    rule_id: str
+    passed: bool
+    severity: Severity = "error"
+    message: str
+    references: list[RuleReference] = Field(default_factory=list)
+    context: dict[str, str] = Field(default_factory=dict)
+
+
+---------------------------------
+aca termina el documento rules.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""JSON Schema helpers."""
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento export.py
+---------------------------------
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Type
+
+from pydantic import BaseModel
+
+
+def export_json_schema(model: Type[BaseModel], out_path: Path) -> None:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    schema = model.model_json_schema()
+    out_path.write_text(json.dumps(schema, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+---------------------------------
+aca termina el documento export.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""Domain services."""
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento contracts.py
+---------------------------------
+
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+
+from elecgenflow.domain.contracts.candidate import DesignCandidate
+from elecgenflow.domain.contracts.problem import DesignProblem
+
+
+class CandidateGenerator(ABC):
+    @abstractmethod
+    def generate(self, problem: DesignProblem) -> list[DesignCandidate]:
+        raise NotImplementedError
+
+    @staticmethod
+    def stub() -> "CandidateGenerator":
+        return _StubCandidateGenerator()
+
+
+class RuleEngine(ABC):
+    @abstractmethod
+    def apply(self, candidate: DesignCandidate) -> DesignCandidate:
+        raise NotImplementedError
+
+    @staticmethod
+    def stub() -> "RuleEngine":
+        return _StubRuleEngine()
+
+
+class SimulationEngine(ABC):
+    @abstractmethod
+    def simulate(self, candidate: DesignCandidate) -> DesignCandidate:
+        raise NotImplementedError
+
+    @staticmethod
+    def stub() -> "SimulationEngine":
+        return _StubSimulationEngine()
+
+
+class Evaluator(ABC):
+    @abstractmethod
+    def evaluate(self, candidate: DesignCandidate) -> DesignCandidate:
+        raise NotImplementedError
+
+    @staticmethod
+    def stub() -> "Evaluator":
+        return _StubEvaluator()
+
+
+class Optimizer(ABC):
+    @abstractmethod
+    def rank(self, candidates: list[DesignCandidate]) -> list[DesignCandidate]:
+        raise NotImplementedError
+
+    @staticmethod
+    def stub() -> "Optimizer":
+        return _StubOptimizer()
+
+
+# -------------------------
+# Stub implementations (EPIC-1)
+# -------------------------
+
+class _StubCandidateGenerator(CandidateGenerator):
+    def generate(self, problem: DesignProblem) -> list[DesignCandidate]:
+        return [DesignCandidate.from_problem(problem, candidate_id="CAND-0001")]
+
+
+class _StubRuleEngine(RuleEngine):
+    def apply(self, candidate: DesignCandidate) -> DesignCandidate:
+        return candidate
+
+
+class _StubSimulationEngine(SimulationEngine):
+    def simulate(self, candidate: DesignCandidate) -> DesignCandidate:
+        return candidate
+
+
+class _StubEvaluator(Evaluator):
+    def evaluate(self, candidate: DesignCandidate) -> DesignCandidate:
+        return candidate
+
+
+class _StubOptimizer(Optimizer):
+    def rank(self, candidates: list[DesignCandidate]) -> list[DesignCandidate]:
+        return candidates
+
+
+---------------------------------
+aca termina el documento contracts.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento __init__.py
+---------------------------------
+
+"""Value objects: small immutable structures with validation."""
+
+
+---------------------------------
+aca termina el documento __init__.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento locale.py
+---------------------------------
+
+from __future__ import annotations
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class LocaleSpec(BaseModel):
+    """Locale de proyecto (por defecto AR)."""
+
+    country: Literal["AR"] = "AR"
+    frequency_hz: int = Field(default=50, ge=1, le=100)
+    voltage_mv_options_v: list[int] = Field(default_factory=lambda: [13200, 33000])
+    voltage_lv_options_v: list[int] = Field(default_factory=lambda: [380, 220])
+
+
+---------------------------------
+aca termina el documento locale.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento standards.py
+---------------------------------
+
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+
+class StandardsRef(BaseModel):
+    """Referencia normativa declarativa (no implica cumplimiento automático)."""
+
+    aea_90364: bool = True
+    aea_95403: bool = True
+    iec_backup: bool = True
+    notes: str | None = Field(default=None, description="Notas sobre alcance normativo aplicable")
+
+
+---------------------------------
+aca termina el documento standards.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento dependency_links.txt
+---------------------------------
+
+
+
+
+---------------------------------
+aca termina el documento dependency_links.txt
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento PKG-INFO
+---------------------------------
+
+Metadata-Version: 2.4
+Name: elecgenflow
+Version: 0.2.0
+Summary: EPyengFlow: Generative Design Engine (MT/BT) - core domain contracts and validation
+Author: ElecGenFlow Contributors
+License: MIT License
+        
+        Copyright (c) 2026
+        
+        Permission is hereby granted...
+        
+Keywords: electrical,engineering,mt,bt,pandapower,ddd,optimization
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: <3.13,>=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandapower>=2.13
+Requires-Dist: numpy>=1.26
+Requires-Dist: pandas>=2.2
+Requires-Dist: scipy>=1.11
+Requires-Dist: pydantic>=2.7
+Requires-Dist: pydantic-settings>=2.2
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: matplotlib>=3.8
+Requires-Dist: seaborn>=0.13
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: ruff>=0.5; extra == "dev"
+Requires-Dist: black>=24.4; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
+Requires-Dist: types-PyYAML>=6.0.12; extra == "dev"
+Dynamic: license-file
+
+# ElecGenFlow
+
+**ElecGenFlow** es un *Generative Design Engine* **headless** para ingeniería eléctrica de **Media Tensión (MT)** y **Baja Tensión (BT)**, enfocado en aplicaciones industriales y comerciales.
+
+## Alcance
+- Distribución eléctrica MT/BT
+- Tableros eléctricos
+- Iluminación técnica (LITE)
+- HVAC industrial
+- Plantas FV (PV) y sistemas BESS
+- Calidad de energía y eficiencia energética
+
+## Normativa (por defecto AR)
+- AEA 90364
+- AEA 95403
+- IEC / IEEE (respaldo)
+
+Frecuencia: 50 Hz  
+Tensiones típicas: 13.2 kV, 33 kV, 380/220 V
+
+## Estado del proyecto
+Versión actual: **v0.2.0**  
+EPIC completadas: EPIC-0, EPIC-1
+
+EPIC-1 incluye:
+- Contratos de dominio (pydantic) + validación
+- Engine headless (orquestación stub) + manifest reproducible
+- CLI mínimo para validar/ejecutar stub
+- CI con ruff/black/mypy/pytest
+
+> Nota: simulación real con pandapower y reglas AEA se implementan en EPIC-4/EPIC-5.
+
+
+---------------------------------
+aca termina el documento PKG-INFO
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento requires.txt
+---------------------------------
+
+pandapower>=2.13
+numpy>=1.26
+pandas>=2.2
+scipy>=1.11
+pydantic>=2.7
+pydantic-settings>=2.2
+pyyaml>=6.0
+matplotlib>=3.8
+seaborn>=0.13
+
+[dev]
+pytest>=8.0
+pytest-cov>=5.0
+ruff>=0.5
+black>=24.4
+mypy>=1.10
+types-PyYAML>=6.0.12
+
+
+---------------------------------
+aca termina el documento requires.txt
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento SOURCES.txt
+---------------------------------
+
+LICENSE
+README.md
+pyproject.toml
+src/elecgenflow/__init__.py
+src/elecgenflow/__main__.py
+src/elecgenflow/init.py
+src/elecgenflow.egg-info/PKG-INFO
+src/elecgenflow.egg-info/SOURCES.txt
+src/elecgenflow.egg-info/dependency_links.txt
+src/elecgenflow.egg-info/requires.txt
+src/elecgenflow.egg-info/top_level.txt
+src/elecgenflow/core/__init__.py
+src/elecgenflow/core/config.py
+src/elecgenflow/core/engine.py
+src/elecgenflow/core/logging.py
+src/elecgenflow/core/manifest.py
+src/elecgenflow/domain/__init__.py
+src/elecgenflow/domain/contracts/__init__.py
+src/elecgenflow/domain/contracts/artifacts.py
+src/elecgenflow/domain/contracts/candidate.py
+src/elecgenflow/domain/contracts/common.py
+src/elecgenflow/domain/contracts/constraints.py
+src/elecgenflow/domain/contracts/metrics.py
+src/elecgenflow/domain/contracts/objectives.py
+src/elecgenflow/domain/contracts/problem.py
+src/elecgenflow/domain/contracts/results.py
+src/elecgenflow/domain/contracts/rules.py
+src/elecgenflow/domain/schemas/__init__.py
+src/elecgenflow/domain/schemas/export.py
+src/elecgenflow/domain/services/__init__.py
+src/elecgenflow/domain/services/contracts.py
+src/elecgenflow/domain/value_objects/__init__.py
+src/elecgenflow/domain/value_objects/locale.py
+src/elecgenflow/domain/value_objects/standards.py
+
+---------------------------------
+aca termina el documento SOURCES.txt
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento top_level.txt
+---------------------------------
+
+elecgenflow
+
+
+---------------------------------
+aca termina el documento top_level.txt
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento test_constraints_defaults.py
+---------------------------------
+
+from __future__ import annotations
+
+from elecgenflow.domain.contracts.constraints import ConstraintSet
+
+
+def test_constraints_defaults_are_none_to_avoid_assumptions() -> None:
+    c = ConstraintSet()
+    assert c.max_voltage_drop_pct is None
+    assert c.max_line_loading_pct is None
+    assert c.min_power_factor is None
+
+
+---------------------------------
+aca termina el documento test_constraints_defaults.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento test_design_problem_validation.py
+---------------------------------
+
+from __future__ import annotations
+
+import pytest
+
+from elecgenflow.domain.contracts.objectives import ObjectiveSpec
+from elecgenflow.domain.contracts.problem import DesignProblem
+
+
+def test_design_problem_minimal_ok() -> None:
+    p = DesignProblem(problem_id="P-001", name="Demo")
+    assert p.problem_id == "P-001"
+    assert p.locale.country == "AR"
+    assert p.standards.aea_90364 is True
+
+
+def test_design_problem_objectives_all_disabled_invalid() -> None:
+    with pytest.raises(ValueError):
+        DesignProblem(
+            problem_id="P-002",
+            name="Demo",
+            objectives=[
+                ObjectiveSpec(name="min_cost", weight=0.0, enabled=True),
+                ObjectiveSpec(name="min_voltage_drop", weight=1.0, enabled=False),
+            ],
+        )
+
+
+def test_design_problem_objectives_enabled_ok() -> None:
+    p = DesignProblem(
+        problem_id="P-003",
+        name="Demo",
+        objectives=[ObjectiveSpec(name="min_cost", weight=1.0, enabled=True)],
+    )
+    assert len(p.objectives) == 1
+
+
+---------------------------------
+aca termina el documento test_design_problem_validation.py
+---------------------------------
+
+
+---------------------------------
+aca inicia el documento test_schema_export.py
+---------------------------------
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from elecgenflow.domain.contracts.problem import DesignProblem
+from elecgenflow.domain.schemas.export import export_json_schema
+
+
+def test_export_json_schema(tmp_path: Path) -> None:
+    out = tmp_path / "DesignProblem.schema.json"
+    export_json_schema(DesignProblem, out)
+    text = out.read_text(encoding="utf-8")
+    assert "problem_id" in text
+
+
+---------------------------------
+aca termina el documento test_schema_export.py
+---------------------------------
+

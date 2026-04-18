@@ -1,0 +1,14 @@
+country: AR
+frequency_hz: 50
+voltages:
+  lv: [380, 220]
+  mv: [13200, 33000]
+
+standards:
+  aea_90364: true
+  aea_95403: true
+  iec_backup: true
+
+default_seed: 12345
+deterministic: true
+artifacts_subdir: artifacts
