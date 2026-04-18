@@ -15,17 +15,23 @@
 - AEA 95403
 - IEC / IEEE (respaldo)
 
-Frecuencia: 50 Hz  
-Tensiones típicas: 13.2 kV, 33 kV, 380/220 V
+**Frecuencia:** 50 Hz  
+**Tensiones típicas:** 13.2 kV, 33 kV, 380/220 V
 
 ## Estado del proyecto
 Versión actual: **v0.2.0**  
-EPIC completadas: EPIC-0, EPIC-1
+EPICs completadas: **EPIC-1, EPIC-2**
 
-EPIC-1 incluye:
-- Contratos de dominio (pydantic) + validación
-- Engine headless (orquestación stub) + manifest reproducible
-- CLI mínimo para validar/ejecutar stub
-- CI con ruff/black/mypy/pytest
+**La EPIC-2 (Domain Core) incluye:**
+- Contratos de dominio (Pydantic) + validación.
+- Engine headless (orquestación stub) + manifest reproducible.
+- CLI mínimo para validar/ejecutar stub.
+- CI con ruff/black/mypy/pytest.
 
-> Nota: simulación real con pandapower y reglas AEA se implementan en EPIC-4/EPIC-5.
+> **Nota:** Siguiendo la arquitectura de capas definida en el **ADR-0002**, la simulación real con **pandapower** y las reglas normativas **AEA** se implementan en las **EPIC-7** y **EPIC-6** respectivamente, garantizando la previa existencia del modelo de componentes y el grafo lógico.
+
+---
+Para más detalles, consulte la carpeta `/docs`:
+- [Roadmap](./docs/ROADMAP.md)
+- [Architecture Decisions (ADRs)](./docs/ADR/)
+- [Product Backlog](./docs/BACKLOG.md)
