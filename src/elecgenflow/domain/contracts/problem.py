@@ -32,9 +32,11 @@ class DesignProblem(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def _validate_objectives(self) -> "DesignProblem":
+    def _validate_objectives(self) -> DesignProblem:
         if self.objectives:
             enabled = [o for o in self.objectives if o.enabled and o.weight > 0]
             if not enabled:
-                raise ValueError("Si objectives se proveen, al menos uno debe estar enabled con weight>0.")
+                raise ValueError(
+                    "Si objectives se proveen, al menos uno debe estar enabled con weight>0."
+                )
         return self

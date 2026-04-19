@@ -11,7 +11,7 @@
 
 ## B) Elecboard DSL / IR & Componentes
 - [ ] Librería de componentes comerciales y base de datos (EPIC-4)
-- [ ] Conexiones lógicas y grafo de red (EPIC-3)
+- [x] Modelo lógico Elecboard IR + grafo de red (EPIC-3)
 - [ ] Traducción de IR a modelo pandapower (EPIC-3/7)
 - [ ] Cargas reales P/Q y modelado de líneas (EPIC-5)
 - [ ] Soporte Monofásico/Trifásico (EPIC-3/5)

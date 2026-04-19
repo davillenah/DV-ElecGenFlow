@@ -4,7 +4,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
 ObjectiveName = Literal[
     "min_cost",
     "min_voltage_drop",

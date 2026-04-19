@@ -23,8 +23,21 @@
 
 ## EPIC-3 — Elecboard IR v1 (modelo lógico)
 - Prioridad: Alta
-- Estado: Pendiente
+- Estado: Hecho
 - Release: v0.3.0
+- Entregables:
+  - Modelo lógico estructural del sistema eléctrico (Elecboard IR)
+  - Entidades: Board, Node, Branch, Load, Source
+  - Representación explícita como grafo
+  - Validaciones estructurales:
+    - conectividad
+    - fases compatibles
+    - nodos huérfanos
+    - topología radial / islas
+  - Serialización / deserialización del IR
+  - Tests unitarios completos (casos válidos e inválidos)
+  - Ejemplo JSON funcional del IR
+  - Documentación técnica formal (EPIC-3)
 
 ## EPIC-4 — Component Library & Part Management
 - Prioridad: Alta

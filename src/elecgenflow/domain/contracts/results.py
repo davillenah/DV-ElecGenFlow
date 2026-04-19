@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from elecgenflow.domain.contracts.candidate import DesignCandidate
 
-
 EngineStatus = Literal["ok", "partial", "failed"]
 
 

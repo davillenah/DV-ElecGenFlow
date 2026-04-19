@@ -12,7 +12,7 @@ class CandidateGenerator(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def stub() -> "CandidateGenerator":
+    def stub() -> CandidateGenerator:
         return _StubCandidateGenerator()
 
 
@@ -22,7 +22,7 @@ class RuleEngine(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def stub() -> "RuleEngine":
+    def stub() -> RuleEngine:
         return _StubRuleEngine()
 
 
@@ -32,7 +32,7 @@ class SimulationEngine(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def stub() -> "SimulationEngine":
+    def stub() -> SimulationEngine:
         return _StubSimulationEngine()
 
 
@@ -42,7 +42,7 @@ class Evaluator(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def stub() -> "Evaluator":
+    def stub() -> Evaluator:
         return _StubEvaluator()
 
 
@@ -52,13 +52,14 @@ class Optimizer(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def stub() -> "Optimizer":
+    def stub() -> Optimizer:
         return _StubOptimizer()
 
 
 # -------------------------
 # Stub implementations (EPIC-1)
 # -------------------------
+
 
 class _StubCandidateGenerator(CandidateGenerator):
     def generate(self, problem: DesignProblem) -> list[DesignCandidate]:

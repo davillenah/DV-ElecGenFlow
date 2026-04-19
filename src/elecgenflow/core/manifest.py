@@ -25,7 +25,9 @@ class RunManifest:
     notes: dict[str, Any] = field(default_factory=dict)
 
     @staticmethod
-    def create(seed: int, config_text: str, problem_text: str, notes: dict[str, Any] | None = None) -> "RunManifest":
+    def create(
+        seed: int, config_text: str, problem_text: str, notes: dict[str, Any] | None = None
+    ) -> RunManifest:
         return RunManifest(
             engine_version=__version__,
             created_utc=datetime.now(timezone.utc).isoformat(),
@@ -37,6 +39,7 @@ class RunManifest:
 
     def to_json(self) -> str:
         import json
+
         return json.dumps(asdict(self), indent=2, ensure_ascii=False)
 
     def write(self, path: Path) -> None:

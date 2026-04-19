@@ -1,0 +1,59 @@
+{
+  "boards": [
+    {
+      "board_id": "B1",
+      "name": "Main LV Board",
+      "level": "LV",
+      "phases": ["L1", "L2", "L3", "N", "PE"],
+      "node_ids": ["N1", "N2"],
+      "meta": {"tag": "demo-board"}
+    }
+  ],
+  "nodes": [
+    {
+      "node_id": "N1",
+      "board_id": "B1",
+      "phases": ["L1", "L2", "L3", "N", "PE"],
+      "kind": "bus",
+      "meta": {}
+    },
+    {
+      "node_id": "N2",
+      "board_id": "B1",
+      "phases": ["L1", "L2", "L3", "N", "PE"],
+      "kind": "terminal",
+      "meta": {}
+    }
+  ],
+  "branches": [
+    {
+      "branch_id": "BR1",
+      "from_node": "N1",
+      "to_node": "N2",
+      "kind": "feeder",
+      "phases": ["L1", "L2", "L3", "N"],
+      "meta": {}
+    }
+  ],
+  "loads": [
+    {
+      "load_id": "L1",
+      "node_id": "N2",
+      "kind": "generic",
+      "phases": ["L1", "L2", "L3", "N"],
+      "meta": {"tag": "demo-load"}
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "S1",
+      "node_id": "N1",
+      "kind": "utility",
+      "phases": ["L1", "L2", "L3", "N"],
+      "meta": {"tag": "demo-source"}
+    }
+  ],
+  "topology": "radial",
+  "allow_islands": false,
+  "meta": {"spec": "EPIC-3 demo"}
+}

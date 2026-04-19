@@ -10,7 +10,6 @@ from elecgenflow.domain.contracts.metrics import MetricsBundle
 from elecgenflow.domain.contracts.problem import DesignProblem
 from elecgenflow.domain.contracts.rules import RuleResult
 
-
 CandidateStatus = Literal["new", "rejected", "simulated", "evaluated", "ranked"]
 
 
@@ -28,7 +27,7 @@ class DesignCandidate(TraceableModel):
     reports: ReportArtifacts = Field(default_factory=ReportArtifacts)
 
     @staticmethod
-    def from_problem(problem: DesignProblem, candidate_id: str) -> "DesignCandidate":
+    def from_problem(problem: DesignProblem, candidate_id: str) -> DesignCandidate:
         return DesignCandidate(
             candidate_id=candidate_id,
             problem_id=problem.problem_id,

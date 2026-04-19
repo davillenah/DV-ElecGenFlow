@@ -60,7 +60,9 @@ class Engine:
         artifacts_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info("Engine run started")
-        logger.info(f"Problem id={problem.problem_id} locale={problem.locale} standards={problem.standards}")
+        logger.info(
+            f"Problem id={problem.problem_id} locale={problem.locale} standards={problem.standards}"
+        )
 
         config_path = Path("configs/default_ar.yaml")
         config_text = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
@@ -86,6 +88,8 @@ class Engine:
             },
         )
 
-        (artifacts_dir / "engine_result.json").write_text(result.model_dump_json(indent=2), encoding="utf-8")
+        (artifacts_dir / "engine_result.json").write_text(
+            result.model_dump_json(indent=2), encoding="utf-8"
+        )
         logger.info("Engine run completed (partial)")
         return result
