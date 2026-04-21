@@ -1,11 +1,11 @@
 # ISSUE LOG
 
-EPIC-3:
+## EPIC-03.00:
 - Sin incidencias críticas.
 - Ajustes menores de validación resueltos durante el desarrollo.
 
-EPIC-2:
+## EPIC-02.00:
 - Sin incidencias registradas.
 
-EPIC-1:
+## EPIC-01.00:
 - Sin incidencias registradas.

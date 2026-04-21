@@ -5,12 +5,12 @@
 > o activamente en desarrollo. Las EPICs futuras se describen a nivel
 > de objetivos hasta que entren en ejecución.
 
-## EPIC-1 — Scaffolding profesional + gobernanza
+## EPIC-01.00: Scaffolding + Governance
 - Prioridad: Alta
 - Estado: Hecho
 - Release: v0.1.0
 
-## EPIC-2 — Núcleo de dominio (DDD) y contratos del motor
+## EPIC-02.00: Domain Core (DDD) + Contracts + Validation
 - Prioridad: Muy Alta
 - Estado: Hecho
 - Release: v0.2.0
@@ -21,7 +21,7 @@
   - Engine headless stub + CLI mínimo
   - Tests unitarios base + CI
 
-## EPIC-3 — Elecboard IR v1 (modelo lógico)
+## EPIC-03.00: Elecboard IR v1 (Logical Graph)
 - Prioridad: Alta
 - Estado: Hecho
 - Release: v0.3.0
@@ -39,81 +39,86 @@
   - Ejemplo JSON funcional del IR
   - Documentación técnica formal (EPIC-3)
 
-## EPIC-4 — Component Library & Part Management
-- Prioridad: Alta
+## EPIC-04.00: DSL + Registry Integration Layer
+- Prioridad: Muy Alta
 - Estado: Pendiente
 - Release: v0.4.0
-- Objetivo: Base de datos de componentes comerciales (cables, protecciones, transformadores) con parámetros técnicos predefinidos.
+- Objetivo: definir entrada canónica por DSL y referencias
+- Entregables:
+  - Board DSL especificada
+  - Network DSL dirigida especificada
+  - Registry schema versionado
+  - Adapter DSL→IR con validación de referencias
 
-## EPIC-5 — Modelo eléctrico real (líneas y cargas)
+## EPIC-05.00: Real Electrical Model (Lines/Loads)
 - Prioridad: Alta
 - Estado: Pendiente
 - Release: v0.5.0
 
-## EPIC-6 — Rule & Constraint Engine (AEA/IEC)
+## EPIC-06.00: Rule & Constraint Engine (AEA/IEC)
 - Prioridad: Alta
 - Estado: Pendiente
 - Release: v0.6.0
 
-## EPIC-7 — Simulation Engine (pandapower) + métricas
+## EPIC-07.00: Simulation Engine (pandapower) + Metrics
 - Prioridad: Alta
 - Estado: Pendiente
 - Release: v0.7.0
 
-## EPIC-8 — Generador de variantes
+## EPIC-08.00: Variant Generator
 - Prioridad: Media
 - Estado: Pendiente
 - Release: v0.8.0
 
-## EPIC-9 — Optimizador + Cost Model
+## EPIC-09.00: Optimizer + Cost Model
 - Prioridad: Media
 - Estado: Pendiente
 - Release: v0.9.0
 
-## EPIC-10 — Scenario Manager (Snapshot & Comparison)
+## EPIC-10.00: Scenario Manager (Snapshot & Comparison)
 - Prioridad: Media
 - Estado: Pendiente
 - Release: v0.10.0
 - Objetivo: Persistencia y comparación técnica entre diferentes variantes y estados de red.
 
-## EPIC-11 — Reporting & Exporting Engine (PDF/Excel/JSON)
+## EPIC-11.00: Reporting & Exporting Engine (PDF/Excel/JSON)
 - Prioridad: Media
 - Estado: Pendiente
 - Release: v0.11.0
 - Objetivo: Generación automatizada de reportes de ingeniería y exportación de datos brutos.
 
-## EPIC-12 — Calidad de energía (THD/PF)
+## EPIC-12.00: Power Quality (THD/PF)
 - Prioridad: Media
 - Estado: Pendiente
 - Release: v0.12.0
 
-## EPIC-13 — Protection Coordination & Tripping Curves
+## EPIC-13.00: Protection Coordination & Tripping Curves
 - Prioridad: Alta
 - Estado: Pendiente
 - Release: v0.13.0
 - Objetivo: Estudio de selectividad y curvas de disparo para interruptores.
 
-## EPIC-14 — PV/BESS
+## EPIC-14.00: PV/BESS
 - Prioridad: Baja
 - Estado: Pendiente
 - Release: v0.14.0
 
-## EPIC-15 — Industrial Hardening
+## EPIC-15.00: Industrial Hardening
 - Prioridad: Media
 - Estado: Pendiente
 - Release: v0.15.0
 
-## EPIC-16 — Release Candidate + docs finales
+## EPIC-16.00: Release Candidate + Final Docs
 - Prioridad: Alta
 - Estado: Pendiente
 - Release: v1.0.0
 
-## EPIC-17 — Integration Layer (IFC/DXF/JSON)
+## EPIC-17.00: Integration Layer (IFC/DXF/JSON Import-Export)
 - Prioridad: Baja
 - Estado: Pendiente
 - Release: v1.1.0
 
-## EPIC-18 — RBAC (Role-Based Access Control) & Audit Logs
+## EPIC-18.00: RBAC (Role-Based Access Control) & Audit Logs
 - Prioridad: Baja
 - Estado: Pendiente
 - Release: v1.2.0
