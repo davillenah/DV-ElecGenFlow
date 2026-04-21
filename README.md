@@ -2,6 +2,14 @@
 
 **ElecGenFlow** es un *Generative Design Engine* **headless** para ingeniería eléctrica de **Media Tensión (MT)** y **Baja Tensión (BT)**, enfocado en aplicaciones industriales y comerciales.
 
+## Principio rector
+
+- Boards DSL describe qué es cada tablero (cargas abajo, protecciones internas, buses, auxiliares).
+- Network DSL describe cómo se conectan tableros (supply_from → to → wire).
+- Registry/DB es la única fuente de verdad para tags físicos (boards, columnas, protecciones, borneras, cables).
+- El IR del motor debe poder construirse desde esas tres capas sin duplicar cargas ni “inventar” protecciones en cables.
+- La carga se declara abajo y se agrega hacia arriba por topología dirigida.
+
 ## Alcance
 - Distribución eléctrica MT/BT
 - Tableros eléctricos

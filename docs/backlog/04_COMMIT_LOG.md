@@ -9,3 +9,4 @@
 - docs(specs): finalize Registry schema and storage evolution strategy
 - docs(backlog): update sprint backlog for EPIC-04 execution order
 - docs(roadmap): move web/db expansion to post-v1.0 ideas
+- docs: normalize epic numbering across docs
