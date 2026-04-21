@@ -50,4 +50,21 @@ ElecGenFlow es un motor generativo para redes eléctricas MT/BT con un principio
 - v00.15.00 — EPIC-15.0: Industrial Hardening
 - v01.00.00 — EPIC-16.0: Release Candidate + Final Docs
 - v01.01.00 — EPIC-17.0: Integration Layer (IFC/DXF/JSON Import-Export)
+
+### Post‑v1.0 / Ideas futuras (no comprometido)
 - v01.02.00 — EPIC-18.0: RBAC (Role-Based Access Control) & Audit Logs
+    - Implementación de lógica de roles (Admin, Editor, Viewer).
+    - Middleware de autorización en el backend.
+    - Registro de eventos críticos para auditoría (quién hizo qué y cuándo).
+- v02.00.00 — EPIC-19.0: Persistent Data Migration & PostgreSQL Integration
+    - Configuración de entorno de producción con PostgreSQL (Dockerización).
+    - Migración de esquemas desde SQLite/DuckDB a Postgres (scripts de migración).
+    - Optimización de tipos de datos (uso de JSONB para campos flexibles y UUIDs para llaves primarias).
+    - Implementación de Connection Pooling para manejo eficiente de conexiones en Python.
+- v02.01.00 — EPIC-20.0: Frontend Modernization with React & Global State
+    - Migración de vistas estáticas o templates a componentes funcionales en React.
+    - Consumo de la API de Python mediante TanStack Query (React Query) para sincronización de datos.
+    - Gestión de estado global (Zustand o Context API) para sesiones de usuario y preferencias.
+- v02.02.00 — EPIC-21.0: Real-time & Advanced Monitoring
+    - Integración de WebSockets (FastAPI/Flask-SocketIO) para actualizaciones en tiempo real en el frontend.
+    - Panel de monitoreo de salud de la base de datos y logs centralizados.
