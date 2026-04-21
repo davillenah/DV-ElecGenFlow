@@ -1,21 +1,53 @@
 # ROADMAP — elecgenflow
 
-## Releases sugeridas (SemVer pre-1.0)
-- v0.1.0 — EPIC-1: Scaffolding + Governance
-- v0.2.0 — EPIC-2: Domain Core (DDD) + Contracts + Validation
-- v0.3.0 — EPIC-3: Elecboard IR v1 (Logical Model)
-- v0.4.0 — EPIC-4: Component Library & Part Management
-- v0.5.0 — EPIC-5: Real Electrical Model (Lines/Loads)
-- v0.6.0 — EPIC-6: Rule & Constraint Engine (AEA/IEC)
-- v0.7.0 — EPIC-7: Simulation Engine (pandapower) + Metrics
-- v0.8.0 — EPIC-8: Variant Generator
-- v0.9.0 — EPIC-9: Optimizer + Cost Model
-- v0.10.0 — EPIC-10: Scenario Manager (Snapshot & Comparison)
-- v0.11.0 — EPIC-11: Reporting & Exporting Engine (PDF/Excel/JSON)
-- v0.12.0 — EPIC-12: Power Quality (THD/PF)
-- v0.13.0 — EPIC-13: Protection Coordination & Tripping Curves
-- v0.14.0 — EPIC-14: PV/BESS
-- v0.15.0 — EPIC-15: Industrial Hardening
-- v1.0.0 — EPIC-16: Release Candidate + Final Docs
-- v1.1.0 — EPIC-17: Integration Layer (IFC/DXF/JSON Import-Export)
-- v1.2.0 — EPIC-18: RBAC (Role-Based Access Control) & Audit Logs
+## Visión (2026)
+ElecGenFlow es un motor generativo para redes eléctricas MT/BT con un principio rector:
+**el usuario declara intención (DSL + tags); el motor resuelve contexto (IR + DB + servicios).**
+
+## Capas (orden obligatorio)
+1. **DSL de Tableros (Board DSL):** descripción interna de tableros y cargas finales.
+2. **DSL de Red (Network DSL):** conectividad dirigida `supply_from(...).to(...).with_wire(...).done()`.
+3. **Registry / Component Library:** IDs y tablas técnicas (cables, protecciones, gabinetes) + tags físicos.
+4. **IR estructural del motor:** grafo validado + referencias a DB (sin duplicación).
+5. **Servicios de ingeniería:** agregación de cargas, validación DAG, sizing, trazabilidad normativa.
+6. **Simulación / optimización:** pandapower, métricas, variantes, Pareto.
+
+## Releases (SemVer pre-1.0)
+- v00.01.00 — EPIC-01.0: Scaffolding + Governance ✅
+- v00.02.00 — EPIC-02.0: Domain Core (DDD) + Contracts + Validation ✅
+- v00.03.00 — EPIC-03.0: Elecboard IR v1 (Logical Graph) ✅
+- v00.04.00 — EPIC-04.0: DSL + Registry Integration Layer
+    - Board DSL canonical
+    - Network DSL canonical (directed)
+    - Registry schema (tags + components references)
+    - IR Adapter (DSL → IR) + validación de referencias
+- v00.04.01 — EPIC-04.1: Electrical Load Modeling and Aggregation
+    - Carga abajo → arriba (sin persistencia duplicada)
+    - Reporte de carga por tablero y por alimentador
+- v00.04.02 — EPIC-04.2: Directed Network Topology Definition
+    - Grafo dirigido (DAG) para alimentación eléctrica
+    - Detección de ciclos eléctricos reales y nodos no alcanzables
+    - Separación entre topología física y flujo eléctrico
+- v00.04.03 — EPIC-04.3: Nominal Tables Management
+    - Tablas técnicas versionadas (cables, protecciones, métodos)
+    - Catálogos (Schneider/Siemens/mix) como overlays
+- v00.04.04 — EPIC-04.4: Sizing and Validation Engine
+    - CableContext (wire + protecciones ref + carga)
+    - Validaciones Ib/In/Iz + caída de tensión (inicial)
+- v00.04.05 — EPIC-04.5: Regulatory Hierarchy and Traceability
+- v00.04.06 — EPIC-04.6: Reporting and Alerts System
+- v00.04.07 — EPIC-04.7: Preparation for Future Automation
+- v00.05.00 — EPIC-05.0: Real Electrical Model (Lines/Loads)
+- v00.06.00 — EPIC-06.0: Rule & Constraint Engine (AEA/IEC)
+- v00.07.00 — EPIC-07.0: Simulation Engine (pandapower) + Metrics
+- v00.08.00 — EPIC-08.0: Variant Generator
+- v00.09.00 — EPIC-09.0: Optimizer + Cost Model
+- v00.10.00 — EPIC-10.0: Scenario Manager (Snapshot & Comparison)
+- v00.11.00 — EPIC-11.0: Reporting & Exporting Engine (PDF/Excel/JSON)
+- v00.12.00 — EPIC-12.0: Power Quality (THD/PF)
+- v00.13.00 — EPIC-13.0: Protection Coordination & Tripping Curves
+- v00.14.00 — EPIC-14.0: PV/BESS
+- v00.15.00 — EPIC-15.0: Industrial Hardening
+- v01.00.00 — EPIC-16.0: Release Candidate + Final Docs
+- v01.01.00 — EPIC-17.0: Integration Layer (IFC/DXF/JSON Import-Export)
+- v01.02.00 — EPIC-18.0: RBAC (Role-Based Access Control) & Audit Logs
