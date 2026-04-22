@@ -176,6 +176,7 @@ dist/
 .cache
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
 
 .env
 .envrc
@@ -186,6 +187,7 @@ venv/
 
 .ipynb_checkpoints/
 
-.ruff_cache/
 htmlcov/
+Reports/
+artifacts/
 out/
