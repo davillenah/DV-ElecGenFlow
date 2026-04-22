@@ -5,7 +5,13 @@
 # CONTACT: ingenierovillena@gmail.com
 ########################################################
 
-DV-ElecGenFlow.txt
+DV-ElecGenFlow_review_md_part*.txt
+DV-ElecGenFlow_review_raw_part*.txt
+
+elecgenflow_ingest_network_compiler.py
+elecgenflow_ingest_project_loader.py
+electro_core_dsl_v1.py
+electro_core_dsl_v2.py
 
 ########################################################
 # SISTEMA Y BASURA

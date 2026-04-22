@@ -20,6 +20,15 @@ All notable changes to this project will be documented in this file.
 - (placeholder) Integration Layer (IFC/DXF/JSON Import-Export) | (EPIC-17)
 - (placeholder) RBAC (Role-Based Access Control) & Audit Logs | (EPIC-18)
 
+## [0.4.0] - 2026-04-22
+### Added
+- Board DSL + Network DSL como entradas canónicas
+- Registry auto-bootstrap (SSoT=Board DSL) + snapshot embebido
+- Project loader automático (Project/Plant/Boards + ccm_assembly + network)
+- Validación estricta del Network (error inmediato ante tags inexistentes)
+- Adapter DSL→ElecboardIR (compatible EPIC-03.00)
+- Tests unitarios + pipeline CI equivalente (ruff/black/mypy/pytest)
+
 ## [0.3.0] - 2026-04-19
 ### Added
 - Elecboard IR v1 (Logical Model): models + structural validation + tests + example JSON
