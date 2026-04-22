@@ -41,7 +41,7 @@
 
 ## EPIC-04.00: DSL + Registry Integration Layer
 - Prioridad: Muy Alta
-- Estado: Pendiente
+- Estado: Hecho
 - Release: v0.4.0
 - Objetivo: definir entrada canónica por DSL y referencias
 - Entregables:
