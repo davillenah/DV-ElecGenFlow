@@ -11,23 +11,34 @@ from pydantic import ValidationError
 from elecgenflow.core.config import load_config
 from elecgenflow.core.engine import Engine
 from elecgenflow.domain.contracts.problem import DesignProblem
+from elecgenflow.project_runner import run_project
 
 logger = logging.getLogger(__name__)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(prog="elecgenflow", description="elecgenflow headless engine")
+
     parser.add_argument(
         "--config",
         type=str,
         default="configs/default_ar.yaml",
         help="Path to engine config YAML (default: configs/default_ar.yaml)",
     )
+
     parser.add_argument("--problem", type=str, help="Path to DesignProblem JSON file")
+    parser.add_argument("--project", type=str, help="Path to Project/ folder (auto-discovery)")
     parser.add_argument("--out", type=str, default="out", help="Output folder for artifacts")
+
     args = parser.parse_args()
 
     try:
+        # Modo proyecto (auto)
+        if args.project:
+            run_project(args.project, out_dir=args.out, config_path=args.config)
+            return 0
+
+        # Modo clásico (problem.json)
         cfg = load_config(Path(args.config))
         engine = Engine(cfg)
 
@@ -48,6 +59,9 @@ def main() -> int:
         return 1
     except ValidationError as exc:
         logger.error("Validation error: %s", exc)
+        return 1
+    except Exception as exc:
+        logger.error("Unhandled error: %s", exc)
         return 1
 
 
