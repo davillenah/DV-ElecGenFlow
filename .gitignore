@@ -13,6 +13,8 @@ elecgenflow_ingest_project_loader.py
 electro_core_dsl_v1.py
 electro_core_dsl_v2.py
 
+examples/plant_superados_*/
+
 ########################################################
 # SISTEMA Y BASURA
 ########################################################
