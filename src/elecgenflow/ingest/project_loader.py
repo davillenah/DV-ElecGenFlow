@@ -5,12 +5,7 @@ from typing import Any, cast
 
 from .errors import ProjectLoadError
 from .import_utils import call_if_exists, import_module_from_path
-from .payload_models import (
-    AssemblySnapshot,
-    BoardSnapshot,
-    NetworkLinkSnapshot,
-    ProjectSnapshots,
-)
+from .payload_models import AssemblySnapshot, BoardSnapshot, NetworkLinkSnapshot, ProjectSnapshots
 
 
 def _find_first_existing(paths: list[Path]) -> Path | None:
@@ -62,65 +57,20 @@ def load_project(project_root: Path) -> ProjectSnapshots:
             )
 
     network_links: list[NetworkLinkSnapshot] = []
-    net_file = _find_first_existing(
-        [plant_dir / "network" / "electrical_network.py", plant_dir / "electrical_network.py"]
-    )
+    network_file: str | None = None
 
+    net_file = _find_first_existing(
+        [
+            plant_dir / "network" / "electrical_network.py",
+            plant_dir / "electrical_network.py",
+        ]
+    )
     if net_file is not None:
+        network_file = str(net_file)
         net_mod = import_module_from_path("plant_network", net_file)
 
         data = call_if_exists(net_mod, "build_network_snapshot")
-        if isinstance(data, list):
-            network_links = cast(list[NetworkLinkSnapshot], data)
-        else:
-            runtime = call_if_exists(net_mod, "build_network_runtime")
-            if runtime is None:
-                runtime = getattr(net_mod, "network", None)
-
-            if runtime is not None:
-                links = getattr(runtime, "links", None)
-                if not isinstance(links, list):
-                    raise ProjectLoadError("No pude obtener network.links del runtime")
-
-                network_links = []
-                for lk in links:
-                    origin = getattr(lk, "origin", None)
-                    dest = getattr(lk, "destination", None)
-                    wire = getattr(lk, "wire", None)
-                    meta = getattr(lk, "meta", {}) or {}
-
-                    if origin is None or dest is None or wire is None:
-                        raise ProjectLoadError("Link runtime inválido (origin/destination/wire)")
-
-                    ob = getattr(origin, "board", "")
-                    db = getattr(dest, "board", "")
-                    ocol = getattr(origin, "column", None)
-                    dcol = getattr(dest, "column", None)
-                    oprot = getattr(origin, "protection", None)
-                    dprot = getattr(dest, "protection", None)
-                    oterm = getattr(origin, "terminal", None)
-                    dterm = getattr(dest, "terminal", None)
-
-                    network_links.append(
-                        {
-                            "origin": {
-                                "board": str(ob) if ob is not None else "",
-                                "column": str(ocol) if isinstance(ocol, str) else None,
-                                "protection": str(oprot) if isinstance(oprot, str) else None,
-                                "terminal": str(oterm) if isinstance(oterm, str) else None,
-                            },
-                            "destination": {
-                                "board": str(db) if db is not None else "",
-                                "column": str(dcol) if isinstance(dcol, str) else None,
-                                "protection": str(dprot) if isinstance(dprot, str) else None,
-                                "terminal": str(dterm) if isinstance(dterm, str) else None,
-                            },
-                            "wire": str(wire),
-                            "meta": cast(dict[str, Any], meta),
-                        }
-                    )
-            else:
-                network_links = []
+        network_links = cast(list[NetworkLinkSnapshot], data) if isinstance(data, list) else []
 
     owner: dict[str, Any] = {}
     owner_file = project_root / "project_owner.py"
@@ -136,5 +86,6 @@ def load_project(project_root: Path) -> ProjectSnapshots:
         boards_by_name=boards_by_name,
         assemblies=assemblies,
         network_links=network_links,
+        network_file=network_file,
         owner=owner,
     )

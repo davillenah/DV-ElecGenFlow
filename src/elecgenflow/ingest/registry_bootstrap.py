@@ -5,7 +5,7 @@ from typing import Any
 
 from .payload_models import AssemblySnapshot, BoardSnapshot, NetworkLinkSnapshot
 
-ENTRYPOINT_TAG = "IG"  # default legacy si no hay tag explícito
+ENTRYPOINT_TAG = "IG"
 
 
 @dataclass
@@ -19,11 +19,20 @@ class RegistryIndex:
     terminals: set[tuple[str, str]] = field(default_factory=set)
     wires: set[str] = field(default_factory=set)
 
+    loads: set[str] = field(default_factory=set)  # cargas finales (virtuales)
+
     in_service_boards: set[str] = field(default_factory=set)
     out_of_service_boards: set[str] = field(default_factory=set)
 
     assembly_columns: dict[str, dict[str, str]] = field(default_factory=dict)
-    # assembly_columns[assembly]["COL-03"] = board_tag
+
+    # runtime degradation (no bloqueante)
+    disabled_boards: set[str] = field(default_factory=set)
+    disabled_columns: set[tuple[str, str]] = field(default_factory=set)  # (assembly, col)
+    disabled_endpoints: set[tuple[str, str]] = field(default_factory=set)  # (board, prot)
+    disabled_entrypoints: set[tuple[str, str]] = field(default_factory=set)  # (board, prot)
+    disabled_terminals: set[tuple[str, str]] = field(default_factory=set)  # (board, terminal)
+    disabled_loads: set[str] = field(default_factory=set)
 
 
 def _iter_circuits(board: BoardSnapshot) -> list[dict[str, Any]]:
@@ -66,6 +75,7 @@ def bootstrap_registry(
     for name in boards_by_name:
         reg.boards.add(name)
 
+    # assemblies → columnas
     for asm in assemblies:
         asm_name = str(asm.get("name"))
         reg.boards.add(asm_name)
@@ -75,12 +85,12 @@ def bootstrap_registry(
         for c in cols:
             idx_raw = c.get("index")
             if idx_raw is None:
-                raise ValueError(f"Assembly '{asm_name}' column sin index: {c}")
+                continue
             idx = int(idx_raw)
 
             board_tag_raw = c.get("board")
             if not isinstance(board_tag_raw, str) or not board_tag_raw:
-                raise ValueError(f"Assembly '{asm_name}' column sin board válido: {c}")
+                continue
             board_tag = board_tag_raw
 
             col_tag = f"COL-{idx:02d}"
@@ -88,6 +98,7 @@ def bootstrap_registry(
             reg.assembly_columns[asm_name][col_tag] = board_tag
             reg.in_service_boards.add(board_tag)
 
+    # boards → endpoints/entrypoints
     for board_name, snap in boards_by_name.items():
         endpoints = snap.get("endpoints")
 
@@ -111,16 +122,22 @@ def bootstrap_registry(
         else:
             _infer_endpoints_from_buses(board_name, snap, reg)
 
+    # network links → in_service + wires + loads
     for lk in network_links:
         o = lk.get("origin") or {}
         d = lk.get("destination") or {}
+
         ob = o.get("board")
         db = d.get("board")
+        ld = d.get("load")
 
         if isinstance(ob, str) and ob:
             reg.in_service_boards.add(ob)
         if isinstance(db, str) and db:
             reg.in_service_boards.add(db)
+
+        if isinstance(ld, str) and ld:
+            reg.loads.add(ld)
 
         wire = lk.get("wire")
         if isinstance(wire, str) and wire:

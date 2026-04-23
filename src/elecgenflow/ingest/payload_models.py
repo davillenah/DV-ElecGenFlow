@@ -1,4 +1,3 @@
-# src/elecgenflow/ingest/payload_models.py
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -6,7 +5,6 @@ from typing import Any, TypedDict
 
 
 class BoardSnapshot(TypedDict, total=False):
-    # snapshot generado por electro_core.Board.build()
     name: str
     system: str
     voltage: str
@@ -20,20 +18,15 @@ class BoardSnapshot(TypedDict, total=False):
     meta: dict[str, Any]
     catalog: Any
 
-    # opcional (EPIC-04.00 SSoT)
     endpoints: list[dict[str, Any]]
 
 
 class EndpointSnapshot(TypedDict, total=False):
-    """
-    total=False => todas las keys son opcionales salvo las que el caller asegure.
-    En nuestro caso, board es conceptualmente obligatorio, pero lo validamos en runtime.
-    """
-
     board: str
     column: str | None
     protection: str | None
     terminal: str | None
+    load: str | None  # destino final (carga virtual)
 
 
 class NetworkLinkSnapshot(TypedDict, total=False):
@@ -45,12 +38,12 @@ class NetworkLinkSnapshot(TypedDict, total=False):
 
 class AssemblyColumnSnapshot(TypedDict, total=False):
     index: int
-    board: str  # board tag que vive en Plant/Boards
+    board: str
 
 
 class AssemblySnapshot(TypedDict, total=False):
     name: str
-    kind: str  # "CCM" | "TGBT" | etc
+    kind: str
     columns: list[AssemblyColumnSnapshot]
     meta: dict[str, Any]
 
@@ -60,4 +53,5 @@ class ProjectSnapshots:
     boards_by_name: dict[str, BoardSnapshot]
     assemblies: list[AssemblySnapshot]
     network_links: list[NetworkLinkSnapshot]
+    network_file: str | None
     owner: dict[str, Any]

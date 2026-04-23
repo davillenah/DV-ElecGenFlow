@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import pytest
-
-from elecgenflow.ingest.errors import MissingTagError
 from elecgenflow.ingest.network_compiler import compile_network
 from elecgenflow.ingest.registry_bootstrap import ENTRYPOINT_TAG, bootstrap_registry
 
 
-def test_network_compiler_raises_on_missing_tag() -> None:
+def test_network_compiler_reports_missing_tag_in_dev_mode() -> None:
     boards = {
-        "CCM 48": {"name": "CCM 48", "buses": []},  # ensamble o placeholder
+        "CCM 48": {"name": "CCM 48", "buses": []},  # placeholder (sin endpoints)
         "TS-FUERZA": {"name": "TS-FUERZA", "main_protection": {"kind": "MCCB"}, "buses": []},
     }
 
@@ -24,5 +21,11 @@ def test_network_compiler_raises_on_missing_tag() -> None:
         }
     ]
 
-    with pytest.raises(MissingTagError):
-        compile_network(links, reg)
+    compiled, report = compile_network(links, reg, mode="dev")
+
+    assert len(compiled) == 0
+    assert report.compiled == 0
+    assert report.skipped == 1
+    assert report.issues
+    assert report.has_errors() is True
+    assert any(i.code == "ORIGIN_ENDPOINT_UNKNOWN" for i in report.issues)
