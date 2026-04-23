@@ -1,0 +1,22 @@
+# COMMIT LOG
+
+- docs(examples): add fluent project example for EPIC-04.00
+- test(epic-04.00): add unit tests for loader, registry bootstrap, compiler, adapter
+- feat(epic-04.00): DSL ingest layer (registry bootstrap + network compiler + adapter + runner)
+- chore(examples): remove legacy minimal JSON samples
+- chore(gitignore): ignore generated outputs and caches
+- updated: se agregan cache y reports al gitignore
+- chore(release): bump version to 0.4.0 and update changelog/readme
+- docs(epic-04.00): close epic and update checklist/backlog/release log
+- docs: normalize epic numbering across docs
+- docs(roadmap): move web/db expansion to post-v1.0 ideas
+- docs(backlog): update sprint backlog for EPIC-04 execution order
+- docs(specs): finalize Registry schema and storage evolution strategy
+- docs(epic-04.XX): clarify scope, exclusions, and role mapping
+- docs(adr): add ADR-0003 pivot post-EPIC-3
+- docs(roadmap): declare EPIC-4 pivot with DSL+Registry+directed network
+- feat(epic-3): close Elecboard IR v1 logical model with validation, tests, docs, and examples
+- docs: add EPIC-3 technical specification for Elecboard IR v1
+- fix: remove legacy DV-ElecGenFlow directory
+- docs: update README with new roadmap and structure
+- chore(epic-2): close domain core with DDD contracts, validation, docs, and reproducible engine

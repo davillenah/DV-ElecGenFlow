@@ -1,0 +1,58 @@
+# CHECKLIST ElecGenFlow
+
+## A) Motor generativo y de simulación
+- [x] DesignProblem schema + validación (EPIC‑02.00)
+- [ ] Generador de variantes (EPIC‑08.00)
+- [ ] Rule engine normativo AEA/IEC (EPIC‑06.00)
+- [ ] Evaluator con métricas reales - pandapower (EPIC‑07.00)
+- [ ] Optimizer (ranking / Pareto) (EPIC‑09.00)
+- [ ] Scenario Manager: Comparativa y snapshots (EPIC‑10.00)
+- [x] Reproducibilidad (seed + manifest) (EPIC‑02.00)
+
+## B) Elecboard DSL / IR & Componentes
+- [x] Modelo lógico Elecboard IR + grafo de red (EPIC‑03.00)
+- [ ] Traducción de IR a modelo pandapower (EPIC‑03.00/EPIC‑07.00)
+- [ ] Cargas reales P/Q y modelado de líneas (EPIC‑05.00)
+- [ ] Soporte Monofásico/Trifásico (EPIC‑03.00/EPIC‑05.00)
+- [ ] Validaciones de ratings de componentes (EPIC‑06.00)
+
+### Entrada canónica (cerrada en v0.4.0)
+- [x] Board DSL canonical (EPIC‑04.00)
+- [x] Network DSL canonical (directed) (EPIC‑04.00)
+- [x] Registry schema + loader + validation (EPIC‑04.00)
+- [x] Adapter DSL→IR con validación de referencias (EPIC‑04.00)
+- [x] JSON bootstrap snapshot for Registry (EPIC‑04.00) *(snapshot embebido; JSON versionados llegan en 04.03/04.04)*
+
+### Post‑v0.4.0 (04.01+)
+- [x] Network DSL runtime vía `build(network)` + fallback snapshot (EPIC‑04.01+)
+- [x] Compiler DEV/RUNTIME (DEV reporta issues; RUNTIME degrada/skip y continúa) (EPIC‑04.01+)
+- [x] Conexión a cargas finales `ends_at_load()` + board virtual `LOAD:<TAG>` (EPIC‑04.01+)
+- [ ] Load aggregation abajo→arriba (sin persistencia duplicada) (EPIC‑04.01)
+- [ ] DAG eléctrico dirigido (alcanzabilidad + ciclos + nodos no alcanzables) (EPIC‑04.02)
+- [ ] Tablas nominales JSON versionadas (cables/protecciones/métodos) (EPIC‑04.03)
+- [ ] Validación técnica (Ib/In/Iz + caída de tensión inicial; sin sizing automático) (EPIC‑04.04)
+- [ ] Librería de componentes comerciales y base de datos (EPIC‑04.03+)
+- [ ] Local DB evaluation (DuckDB vs SQLite) documented (EPIC‑04.XX)
+
+## C) Cálculos avanzados y Normativa
+- [ ] Caída de tensión AEA (EPIC‑06.00/EPIC‑07.00)
+- [ ] Ampacidad AEA/IEC parametrizable (EPIC‑05.00/EPIC‑06.00)
+- [ ] Cortocircuito IEC 60909 (EPIC‑07.00)
+- [ ] Selectividad de protecciones y curvas de disparo (EPIC‑13.00)
+- [ ] Factor de potencia, compensación y THD (EPIC‑12.00)
+- [ ] Integración de sistemas renovables PV/BESS (EPIC‑14.00)
+
+## D) Salida e Integración
+- [ ] Motor de reportes ingenieriles PDF/Excel (EPIC‑11.00)
+- [ ] Exportación de datos brutos JSON/CSV (EPIC‑11.00)
+- [ ] Planos eléctricos automáticos (unifilar/listados/esquemas) (EPIC‑17.00)
+- [ ] Reporte interactivo OFF‑LINE (HTML/CSS/JS) (EPIC‑20.00 / idea futura)
+
+## E) Software / DevOps
+- [x] Repo scaffold (EPIC‑01.00)
+- [x] CI activo (ruff + black + mypy + pytest + coverage) (EPIC‑02.00)
+- [x] Lint/format/tipado configurados (EPIC‑02.00)
+- [x] Tests + coverage base (EPIC‑02.00)
+- [x] Docs base + ADRs actualizados (EPIC‑01.00/EPIC‑03.00)
+- [ ] Hardening industrial y optimización de performance (EPIC‑15.00)
+- [ ] Control de acceso (RBAC) y Logs de auditoría (EPIC‑18.00)
