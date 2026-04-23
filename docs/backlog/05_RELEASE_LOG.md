@@ -20,3 +20,8 @@
   - Adapter DSL→IR (compatible EPIC-03.00)
   - Out-of-service boards (no se consideran si no están en network/assembly)
   - Tests unitarios EPIC-04.00
+
+## v0.4.1 (pendiente)
+- EPIC-04.01+: Network DSL runtime (build(network)) + degradación runtime (no bloqueante)
+- EPIC-04.01+: Conexión a cargas finales: `ends_at_load` (board virtual `LOAD:<TAG>`)
+- EPIC-04.01+: Reporte de compilación embebido (`compile_report`)

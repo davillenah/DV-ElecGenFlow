@@ -4,21 +4,28 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- (placeholder) Component Library & Part Management | (EPIC-4)
-- (placeholder) Real Electrical Model (Lines/Loads) | (EPIC-5)
-- (placeholder) Rule & Constraint Engine (AEA/IEC) | (EPIC-6)
-- (placeholder) Simulation Engine (pandapower) + Metrics | (EPIC-7)
-- (placeholder) Variant Generator | (EPIC-8)
-- (placeholder) Optimizer + Cost Model | (EPIC-9)
-- (placeholder) Scenario Manager (Snapshot & Comparison) | (EPIC-10)
-- (placeholder) Reporting & Exporting Engine (PDF/Excel/JSON) | (EPIC-11)
-- (placeholder) Power Quality (THD/PF) | (EPIC-12)
-- (placeholder) Protection Coordination & Tripping Curves | (EPIC-13)
-- (placeholder) PV/BESS | (EPIC-14)
-- (placeholder) Industrial Hardening | (EPIC-15)
-- (placeholder) Release Candidate + Final Docs | (EPIC-16)
-- (placeholder) Integration Layer (IFC/DXF/JSON Import-Export) | (EPIC-17)
-- (placeholder) RBAC (Role-Based Access Control) & Audit Logs | (EPIC-18)
+- EPIC-04.01+: Network DSL runtime vía `build(network)` (fluent API) + fallback `build_network_snapshot()`
+- EPIC-04.01+: Compilación con 2 modos:
+  - DEV: reporta issues (sin frenar por el primer error)
+  - RUNTIME: no detiene todo; salta links inválidos y degrada (disabled boards/columns/endpoints/entrypoints/terminals)
+- EPIC-04.01+: Soporte de `from_source(...)` y `ends_at_load("LOAD-TAG")` para conexiones a cargas finales (board virtual `LOAD:<TAG>`)
+- EPIC-04.01+: Adapter DSL→ElecboardIR: soporte de loads virtuales + `compile_report` embebido
+- (placeholder) Component Library & Part Management | (EPIC-04.00)
+- (placeholder) Real Electrical Model (Lines/Loads) | (EPIC-05.00)
+- (placeholder) Rule & Constraint Engine (AEA/IEC) | (EPIC-06.00)
+- (placeholder) Simulation Engine (pandapower) + Metrics | (EPIC-07.00)
+- (placeholder) Variant Generator | (EPIC-08.00)
+- (placeholder) Optimizer + Cost Model | (EPIC-09.00)
+- (placeholder) Scenario Manager (Snapshot & Comparison) | (EPIC-10.00)
+- (placeholder) Reporting & Exporting Engine (PDF/Excel/JSON) | (EPIC-11.00)
+- (placeholder) Power Quality (THD/PF) | (EPIC-12.00)
+- (placeholder) Protection Coordination & Tripping Curves | (EPIC-13.00)
+- (placeholder) PV/BESS | (EPIC-14.00)
+- (placeholder) Industrial Hardening | (EPIC-15.00)
+- (placeholder) Release Candidate + Final Docs | (EPIC-16.00)
+- (placeholder) Integration Layer (IFC/DXF/JSON Import-Export) | (EPIC-17.00)
+- (placeholder) RBAC (Role-Based Access Control) & Audit Logs | (EPIC-18.00)
+
 
 ## [0.4.0] - 2026-04-22
 ### Added
