@@ -15,6 +15,11 @@ class LoadTotals:
 _NUM_UNIT_RE = re.compile(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z]+)\s*$")
 
 
+def _s(x: Any) -> str:
+    """Safe string cast for dict.get() values (prevents Optional[str] mypy issues)."""
+    return x if isinstance(x, str) else ""
+
+
 def _to_float_opt(x: Any) -> float | None:
     try:
         return float(x)
@@ -32,6 +37,7 @@ def _parse_raw_string(raw: str) -> tuple[float, str] | None:
 
 
 def _convert_value_unit(value: float, unit: str, *, pf: float) -> LoadTotals:
+    # VA-family -> derive kW
     if unit == "va":
         kva = value / 1000.0
         return LoadTotals(kw=kva * pf, kva=kva)
@@ -42,6 +48,7 @@ def _convert_value_unit(value: float, unit: str, *, pf: float) -> LoadTotals:
         kva = value * 1000.0
         return LoadTotals(kw=kva * pf, kva=kva)
 
+    # W-family -> derive kVA
     if unit == "w":
         kw = value / 1000.0
         return LoadTotals(kw=kw, kva=(kw / pf))
@@ -52,6 +59,7 @@ def _convert_value_unit(value: float, unit: str, *, pf: float) -> LoadTotals:
         kw = value * 1000.0
         return LoadTotals(kw=kw, kva=(kw / pf))
 
+    # HP -> kW -> kVA
     if unit == "hp":
         kw = value * 0.746
         return LoadTotals(kw=kw, kva=(kw / pf))
@@ -73,8 +81,9 @@ def _norm_load(load: Any, *, pf: float) -> LoadTotals:
     if not isinstance(load, dict):
         return LoadTotals(raw=1)
 
-    if "raw" in load and isinstance(load.get("raw"), str):
-        parsed = _parse_raw_string(str(load["raw"]))
+    raw_val = load.get("raw")
+    if isinstance(raw_val, str):
+        parsed = _parse_raw_string(raw_val)
         if not parsed:
             return LoadTotals(raw=1)
         v, unit = parsed
@@ -132,12 +141,16 @@ class LoadAggregationService:
         feeders: list[dict[str, Any]] = []
         all_in_service: set[str] = set(in_service_boards)
 
-        # assembly -> columns (roll-up macro)
+        # board -> owning assembly (para feeder view)
+        board_to_assembly: dict[str, str] = {}
+
+        # assembly -> columns edges (roll-up macro) + map board->assembly
         for asm, colmap in asm_cols.items():
             if asm not in in_service_boards:
                 continue
             all_in_service.add(asm)
             for _col, board_tag in colmap.items():
+                board_to_assembly[board_tag] = asm
                 if board_tag in in_service_boards:
                     graph.setdefault(asm, []).append(board_tag)
 
@@ -146,19 +159,19 @@ class LoadAggregationService:
             o = lk.get("origin") or {}
             d = lk.get("destination") or {}
 
-            ob = o.get("board")
-            if not isinstance(ob, str) or not ob:
+            ob_any = o.get("board")
+            if not isinstance(ob_any, str) or not ob_any:
                 continue
-            if ob not in in_service_boards:
+            if ob_any not in in_service_boards:
                 continue
+            ob = ob_any
 
             load_tag = d.get("load")
             if isinstance(load_tag, str) and load_tag:
                 db = _virtual_load_board_name(load_tag)
                 all_in_service.add(db)
             else:
-                db_any = d.get("board")
-                db = str(db_any) if isinstance(db_any, str) and db_any else ""
+                db = _s(d.get("board"))
                 if not db:
                     continue
                 if db in in_service_boards:
@@ -170,7 +183,7 @@ class LoadAggregationService:
                 {
                     "from_board": ob,
                     "to": db,
-                    "wire": lk.get("wire"),
+                    "wire": _s(lk.get("wire")),
                     "meta": lk.get("meta") or {},
                 }
             )
@@ -215,11 +228,11 @@ class LoadAggregationService:
         for b in all_in_service:
             dfs(b, set())
 
-        # feeder downstream totals
+        # feeder downstream totals (board-level)
         feeder_reports: list[dict[str, Any]] = []
         for f in feeders:
-            to_b = f["to"]
-            tt = total.get(to_b, LoadTotals())
+            to_board = _s(f.get("to"))
+            tt = total.get(to_board, LoadTotals())
             feeder_reports.append(
                 {
                     **f,
@@ -230,6 +243,23 @@ class LoadAggregationService:
                     },
                 }
             )
+
+        # feeder view by assembly (04.01-D)  ✅ FIX mypy Optional[str]
+        feeders_assembly_view: list[dict[str, Any]] = []
+        for f in feeder_reports:
+            fb = _s(f.get("from_board"))
+            asm = board_to_assembly.get(fb) or ""  # <- FIX: Optional[str] -> str
+            if asm:
+                feeders_assembly_view.append(
+                    {
+                        "from_assembly": asm,
+                        "from_board": fb,
+                        "to": _s(f.get("to")),
+                        "wire": _s(f.get("wire")),
+                        "downstream_total": f.get("downstream_total") or {},
+                        "meta": f.get("meta") or {},
+                    }
+                )
 
         # roots (indegree 0) on all_in_service
         indeg: dict[str, int] = dict.fromkeys(all_in_service, 0)
@@ -242,7 +272,7 @@ class LoadAggregationService:
 
         roots = sorted([b for b, deg in indeg.items() if deg == 0])
 
-        # root totals (04.01-A)
+        # root totals + system total
         root_totals: list[dict[str, Any]] = []
         sys_kw = 0.0
         sys_kva = 0.0
@@ -279,18 +309,23 @@ class LoadAggregationService:
             }
 
         return {
-            "version": "0.4",
+            "version": "0.5",
             "power_factor": pf,
             "roots": roots,
             "root_totals": root_totals,
             "system_total": {"kW": round(sys_kw, 6), "kVA": round(sys_kva, 6), "raw": sys_raw},
-            "in_service": {"boards": in_service_reports, "feeders": feeder_reports},
+            "in_service": {
+                "boards": in_service_reports,
+                "feeders": feeder_reports,
+                "feeders_assembly_view": feeders_assembly_view,
+            },
             "out_of_service": {"boards": out_service_reports},
             "issues": issues,
             "notes": {
                 "units_supported": ["VA", "kVA", "MVA", "W", "kW", "MW", "HP"],
                 "pf_constant_for_now": True,
                 "assembly_rollup_enabled": True,
+                "feeders_assembly_view_enabled": True,
             },
         }
 
@@ -320,7 +355,7 @@ class LoadAggregationService:
             lines.append("| Root | Total kW | Total kVA | Raw |")
             lines.append("|---|---:|---:|---:|")
             for rt in root_totals:
-                root = rt.get("root", "")
+                root = _s(rt.get("root"))
                 tot = rt.get("total") or {}
                 lines.append(
                     f"| {root} | {tot.get('kW', 0):.3f} | {tot.get('kVA', 0):.3f} | {tot.get('raw', 0)} |"
@@ -330,6 +365,7 @@ class LoadAggregationService:
         ins = load_report.get("in_service") or {}
         ins_boards = ins.get("boards") or {}
         feeders = ins.get("feeders") or []
+        feeders_asm = ins.get("feeders_assembly_view") or []
 
         oos = load_report.get("out_of_service") or {}
         oos_boards = oos.get("boards") or {}
@@ -352,7 +388,7 @@ class LoadAggregationService:
 
         for b, info in oos_boards.items():
             loc = info.get("local") or {}
-            note = info.get("note", "out_of_service")
+            note = _s(info.get("note")) or "out_of_service"
             lines.append(
                 f"| {b} | out_of_service | {loc.get('kW', 0):.3f} | {loc.get('kVA', 0):.3f} | {loc.get('raw', 0)} | "
                 f"{0.0:.3f} | {0.0:.3f} | {0} |  | {note} |"
@@ -366,9 +402,24 @@ class LoadAggregationService:
         for f in feeders:
             dt = f.get("downstream_total") or {}
             lines.append(
-                f"| {f.get('from_board','')} | {f.get('to','')} | {f.get('wire','')} | "
+                f"| {_s(f.get('from_board'))} | {_s(f.get('to'))} | {_s(f.get('wire'))} | "
                 f"{dt.get('kW', 0):.3f} | {dt.get('kVA', 0):.3f} | {dt.get('raw', 0)} |"
             )
+
+        if feeders_asm:
+            lines.append("")
+            lines.append("## Feeder Summary (Assembly View)")
+            lines.append("")
+            lines.append(
+                "| From Assembly | From Board | To | Wire | Downstream kW | Downstream kVA | Raw |"
+            )
+            lines.append("|---|---|---|---|---:|---:|---:|")
+            for f in feeders_asm:
+                dt = f.get("downstream_total") or {}
+                lines.append(
+                    f"| {_s(f.get('from_assembly'))} | {_s(f.get('from_board'))} | {_s(f.get('to'))} | {_s(f.get('wire'))} | "
+                    f"{dt.get('kW', 0):.3f} | {dt.get('kVA', 0):.3f} | {dt.get('raw', 0)} |"
+                )
 
         issues = load_report.get("issues") or []
         if issues:
