@@ -24,6 +24,8 @@ def build(netw: Network) -> Network:
             .done()
     )
 
+    return netw
+    '''
     (
         netw.from_source("CCM 48")
             .column("COL-05")
@@ -31,5 +33,4 @@ def build(netw: Network) -> Network:
             .with_wire("4x10mm2")
             .ends_at_load("MOTOR-BOMBA-01")
     )
-
-    return netw
+    '''
