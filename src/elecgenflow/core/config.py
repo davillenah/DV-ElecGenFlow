@@ -34,6 +34,9 @@ class EngineConfig(BaseModel):
 
     artifacts_subdir: str = "artifacts"
 
+    # EPIC-04.01-B
+    power_factor_default: float = Field(default=0.85, ge=0.0, le=1.0)
+
 
 def load_config(path: Path) -> EngineConfig:
     if not path.exists():

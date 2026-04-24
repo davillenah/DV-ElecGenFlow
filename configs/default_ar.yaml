@@ -12,3 +12,5 @@ standards:
 default_seed: 12345
 deterministic: true
 artifacts_subdir: artifacts
+
+power_factor_default: 0.85
