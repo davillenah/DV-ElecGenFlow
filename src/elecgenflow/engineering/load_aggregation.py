@@ -20,6 +20,26 @@ def _s(x: Any) -> str:
     return x if isinstance(x, str) else ""
 
 
+def _f0(x: Any) -> float:
+    """Safe float cast: None/invalid -> 0.0 (prevents mypy arg-type issues)."""
+    try:
+        if x is None:
+            return 0.0
+        return float(x)
+    except Exception:
+        return 0.0
+
+
+def _i0(x: Any) -> int:
+    """Safe int cast: None/invalid -> 0."""
+    try:
+        if x is None:
+            return 0
+        return int(x)
+    except Exception:
+        return 0
+
+
 def _to_float_opt(x: Any) -> float | None:
     try:
         return float(x)
@@ -121,6 +141,15 @@ def _board_local_totals(board_snap: dict[str, Any], *, pf: float) -> LoadTotals:
 
 def _virtual_load_board_name(load_tag: str) -> str:
     return f"LOAD:{load_tag}"
+
+
+def _kva_of_feeder(f: dict[str, Any]) -> float:
+    dt = f.get("downstream_total") or {}
+    return _f0(dt.get("kVA"))
+
+
+def _top_n_feeders_by_kva(feeders: list[dict[str, Any]], n: int = 5) -> list[dict[str, Any]]:
+    return sorted(feeders, key=_kva_of_feeder, reverse=True)[: max(0, int(n))]
 
 
 class LoadAggregationService:
@@ -244,11 +273,14 @@ class LoadAggregationService:
                 }
             )
 
-        # feeder view by assembly (04.01-D)  ✅ FIX mypy Optional[str]
+        # Top feeders by kVA
+        feeders_top_kva = _top_n_feeders_by_kva(feeder_reports, n=5)
+
+        # feeder view by assembly (per-row)
         feeders_assembly_view: list[dict[str, Any]] = []
         for f in feeder_reports:
             fb = _s(f.get("from_board"))
-            asm = board_to_assembly.get(fb) or ""  # <- FIX: Optional[str] -> str
+            asm = board_to_assembly.get(fb) or ""
             if asm:
                 feeders_assembly_view.append(
                     {
@@ -260,6 +292,62 @@ class LoadAggregationService:
                         "meta": f.get("meta") or {},
                     }
                 )
+
+        # Collapsed assembly view (group+sum)
+        agg: dict[tuple[str, str, str], dict[str, Any]] = {}
+        for f in feeders_assembly_view:
+            fa = _s(f.get("from_assembly"))
+            to_b = _s(f.get("to"))
+            wire = _s(f.get("wire"))
+            key = (fa, to_b, wire)
+
+            dt = f.get("downstream_total") or {}
+            kw = _f0(dt.get("kW"))
+            kva = _f0(dt.get("kVA"))
+            raw = _i0(dt.get("raw"))
+
+            slot = agg.get(key)
+            if slot is None:
+                slot = {
+                    "from_assembly": fa,
+                    "to": to_b,
+                    "wire": wire,
+                    "from_boards": set(),  # set[str]
+                    "downstream_total": {"kW": 0.0, "kVA": 0.0, "raw": 0},
+                }
+                agg[key] = slot
+
+            from_boards_set = slot["from_boards"]
+            from_boards_set.add(_s(f.get("from_board")))
+
+            slot_dt = slot["downstream_total"]
+            slot_dt["kW"] = _f0(slot_dt.get("kW")) + kw
+            slot_dt["kVA"] = _f0(slot_dt.get("kVA")) + kva
+            slot_dt["raw"] = _i0(slot_dt.get("raw")) + raw
+
+        feeders_assembly_view_collapsed: list[dict[str, Any]] = []
+        for (_fa, _to, _wire), slot in agg.items():
+            from_boards_set = slot.pop("from_boards")
+            from_boards = sorted(from_boards_set)  # ✅ ruff C414: no list()
+            dt = slot.get("downstream_total") or {}
+            feeders_assembly_view_collapsed.append(
+                {
+                    "from_assembly": _s(slot.get("from_assembly")),
+                    "to": _s(slot.get("to")),
+                    "wire": _s(slot.get("wire")),
+                    "from_boards": from_boards,
+                    "downstream_total": {
+                        "kW": round(_f0(dt.get("kW")), 6),
+                        "kVA": round(_f0(dt.get("kVA")), 6),
+                        "raw": _i0(dt.get("raw")),
+                    },
+                }
+            )
+
+        feeders_assembly_view_collapsed.sort(
+            key=lambda x: _f0((x.get("downstream_total") or {}).get("kVA")),
+            reverse=True,
+        )
 
         # roots (indegree 0) on all_in_service
         indeg: dict[str, int] = dict.fromkeys(all_in_service, 0)
@@ -309,7 +397,7 @@ class LoadAggregationService:
             }
 
         return {
-            "version": "0.5",
+            "version": "0.6",
             "power_factor": pf,
             "roots": roots,
             "root_totals": root_totals,
@@ -317,7 +405,9 @@ class LoadAggregationService:
             "in_service": {
                 "boards": in_service_reports,
                 "feeders": feeder_reports,
+                "feeders_top_kva": feeders_top_kva,
                 "feeders_assembly_view": feeders_assembly_view,
+                "feeders_assembly_view_collapsed": feeders_assembly_view_collapsed,
             },
             "out_of_service": {"boards": out_service_reports},
             "issues": issues,
@@ -326,6 +416,8 @@ class LoadAggregationService:
                 "pf_constant_for_now": True,
                 "assembly_rollup_enabled": True,
                 "feeders_assembly_view_enabled": True,
+                "feeders_assembly_view_collapsed_enabled": True,
+                "feeders_top_kva_enabled": True,
             },
         }
 
@@ -365,10 +457,25 @@ class LoadAggregationService:
         ins = load_report.get("in_service") or {}
         ins_boards = ins.get("boards") or {}
         feeders = ins.get("feeders") or []
+        feeders_top = ins.get("feeders_top_kva") or []
         feeders_asm = ins.get("feeders_assembly_view") or []
+        feeders_asm_collapsed = ins.get("feeders_assembly_view_collapsed") or []
 
         oos = load_report.get("out_of_service") or {}
         oos_boards = oos.get("boards") or {}
+
+        if feeders_top:
+            lines.append("## Top Feeders (kVA)")
+            lines.append("")
+            lines.append("| From | To | Wire | Downstream kW | Downstream kVA | Raw |")
+            lines.append("|---|---|---|---:|---:|---:|")
+            for f in feeders_top:
+                dt = f.get("downstream_total") or {}
+                lines.append(
+                    f"| {_s(f.get('from_board'))} | {_s(f.get('to'))} | {_s(f.get('wire'))} | "
+                    f"{_f0(dt.get('kW')):.3f} | {_f0(dt.get('kVA')):.3f} | {_i0(dt.get('raw'))} |"
+                )
+            lines.append("")
 
         lines.append("## Board Summary (ALL)")
         lines.append("")
@@ -403,7 +510,7 @@ class LoadAggregationService:
             dt = f.get("downstream_total") or {}
             lines.append(
                 f"| {_s(f.get('from_board'))} | {_s(f.get('to'))} | {_s(f.get('wire'))} | "
-                f"{dt.get('kW', 0):.3f} | {dt.get('kVA', 0):.3f} | {dt.get('raw', 0)} |"
+                f"{_f0(dt.get('kW')):.3f} | {_f0(dt.get('kVA')):.3f} | {_i0(dt.get('raw'))} |"
             )
 
         if feeders_asm:
@@ -418,7 +525,24 @@ class LoadAggregationService:
                 dt = f.get("downstream_total") or {}
                 lines.append(
                     f"| {_s(f.get('from_assembly'))} | {_s(f.get('from_board'))} | {_s(f.get('to'))} | {_s(f.get('wire'))} | "
-                    f"{dt.get('kW', 0):.3f} | {dt.get('kVA', 0):.3f} | {dt.get('raw', 0)} |"
+                    f"{_f0(dt.get('kW')):.3f} | {_f0(dt.get('kVA')):.3f} | {_i0(dt.get('raw'))} |"
+                )
+
+        if feeders_asm_collapsed:
+            lines.append("")
+            lines.append("## Feeder Summary (Assembly View — Collapsed)")
+            lines.append("")
+            lines.append(
+                "| From Assembly | To | Wire | From Boards | Downstream kW | Downstream kVA | Raw |"
+            )
+            lines.append("|---|---|---|---|---:|---:|---:|")
+            for f in feeders_asm_collapsed:
+                dt = f.get("downstream_total") or {}
+                from_boards = f.get("from_boards") or []
+                fb_txt = ", ".join(from_boards) if isinstance(from_boards, list) else ""
+                lines.append(
+                    f"| {_s(f.get('from_assembly'))} | {_s(f.get('to'))} | {_s(f.get('wire'))} | {fb_txt} | "
+                    f"{_f0(dt.get('kW')):.3f} | {_f0(dt.get('kVA')):.3f} | {_i0(dt.get('raw'))} |"
                 )
 
         issues = load_report.get("issues") or []
