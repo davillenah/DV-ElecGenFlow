@@ -23,6 +23,7 @@ from elecgenflow.ingest.network_compiler import compile_network
 from elecgenflow.ingest.payload_models import NetworkLinkSnapshot
 from elecgenflow.ingest.project_loader import load_project
 from elecgenflow.ingest.registry_bootstrap import bootstrap_registry
+from elecgenflow.reporting.pdf_report import build_engineering_pdf
 from electro_core.network import Network
 
 logger = logging.getLogger(__name__)
@@ -133,6 +134,13 @@ def run_project(
         json.dumps(load_report, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     load_md_path.write_text(load_md, encoding="utf-8")
+    # EPIC-11 precursor: consolidated PDF from artifacts
+    pdf_path = artifacts_dir / "engineering_report.pdf"
+    pdf_res = build_engineering_pdf(
+        project_name=project_root.name,
+        artifacts_dir=artifacts_dir,
+        out_pdf=pdf_path,
+    )
 
     # ------------------------------------------------------------------
     # EPIC-04.02 — DAG report
@@ -247,6 +255,12 @@ def run_project(
                 "nominal_snapshot_md": str(nominal_md_path.as_posix()),
                 "nominal_overlay_diff_json": str(overlay_json_path.as_posix()),
                 "nominal_overlay_diff_md": str(overlay_md_path.as_posix()),
+                "engineering_report_pdf": str(pdf_path.as_posix()),
+            },
+            "pdf_build": {
+                "enabled": pdf_res.enabled,
+                "pdf_path": pdf_res.pdf_path,
+                "reason": pdf_res.reason,
             },
         },
         "owner": snapshots.owner,
