@@ -1,1 +1,1 @@
-"""Engineering services (post-IR): aggregation, DAG, sizing, validation, reporting."""
+"""Engineering services (post-IR): aggregation, DAG, nominal tables, sizing, validation, reporting."""

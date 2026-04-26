@@ -37,6 +37,11 @@ class EngineConfig(BaseModel):
     # EPIC-04.01-B
     power_factor_default: float = Field(default=0.85, ge=0.0, le=1.0)
 
+    # EPIC-04.03
+    nominal_tables_root: str = "data/nominal"
+    nominal_tables_version: str = "v0"
+    nominal_overlays: list[str] = Field(default_factory=list)
+
 
 def load_config(path: Path) -> EngineConfig:
     if not path.exists():
