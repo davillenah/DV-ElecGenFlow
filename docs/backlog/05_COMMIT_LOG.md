@@ -1,5 +1,6 @@
 # COMMIT LOG
 
+- 042) chore(release): bump version to 0.4.3
 - 041) feat(epic-04.03): nominal tables v0 + overlays + loader + lookup + overlay diff + tests
 - 040) feat(epic-11): integrate PDF build; ignore invalid nominal overlays
 - 039) feat(epic-11): generate engineering_report.pdf with KPI cover and styled tables

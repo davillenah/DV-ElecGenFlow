@@ -5,6 +5,10 @@ Histórico:
 - Sprint EPIC-02.00: cerrado
 - Sprint EPIC-03.00: cerrado
 - Sprint EPIC-04.00: cerrado
+- Sprint EPIC-04.01: cerrado
+- Sprint EPIC-04.02: cerrado
+- Sprint EPIC-04.03: cerrado
+- Sprint EPIC-11.00: parcial
 
 ---
 

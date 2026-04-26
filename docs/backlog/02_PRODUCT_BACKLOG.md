@@ -39,7 +39,7 @@
   - Validación de nodos no alcanzables e islas.
 
 ## EPIC-04.03: Nominal Tables Management
-- Estado: Pendiente
+- Estado: Hecho (v0)
 - Release: v0.4.3
 - Macro objetivo: Paso 8
 - Requerimientos:
@@ -47,6 +47,11 @@
   - Overlays por fabricante.
   - Loader/validator de tablas (sin sizing automático).
   - Librería de componentes comerciales y base de datos (EPIC‑04.03+).
+- Entrega:
+  - Tablas versionadas (cables/protecciones/métodos)
+  - Overlays por fabricante (estructura segmentada)
+  - Loader/validator + lookup
+  - Artifacts: nominal_snapshot / nominal_overlay_diff
 
 ## EPIC-04.04: Sizing and Validation Engine (modo validación)
 - Estado: Pendiente
@@ -97,12 +102,15 @@
 - Requerimientos: Comparativa de resultados y snapshots de diseño.
 
 ## EPIC-11.00: Reporting & Exporting Engine (PDF/Excel/JSON)
-- Estado: Pendiente
+- Estado: En Proceso
 - Release: v0.11.0
 - Macro objetivo: Paso 12
 - Requerimientos:
   - Reporte PDF completo.
   - Export técnico Excel/JSON/CSV.
+- Entrega:
+  - v0.4.3 incluye un precursor PDF desde artifacts (ADR-0007).
+  - Estado del motor final EPIC-11: Pendiente.
 
 ## EPIC-12.00: Factor de potencia, compensación y THD
 - Estado: Pendiente

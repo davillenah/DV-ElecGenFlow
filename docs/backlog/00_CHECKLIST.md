@@ -62,3 +62,24 @@
 - [ ] Exportación de datos brutos JSON/CSV (EPIC‑11.00)
 - [ ] Planos eléctricos automáticos (unifilar/listados/esquemas) (EPIC‑17.00)
 - [ ] Reporte interactivo OFF‑LINE (HTML/CSS/JS) (EPIC‑20.00 / idea futura)
+
+---
+
+## ADDENDUM (pre-release v0.4.3) — Estado real de implementación
+
+### EPIC-04.02 (DAG)
+- [x] DirectedElectricalGraphService implementado (roots/reachability/cycles/unreachable)
+- [x] Artifacts: `dag_report.json/.md`
+- [x] Tests: roots, cycles, unreachable
+
+> Nota: si existe un ítem duplicado de DAG en estado [ ], se considera redundante. El estado correcto es DONE.
+
+### EPIC-04.03 (Nominal Tables)
+- [x] Tablas nominales JSON v0: cables / protecciones / métodos
+- [x] Overlays por fabricante (estructura segmentada)
+- [x] Loader/validator + lookup + overlay diff artifacts
+- [x] Artifacts: `nominal_snapshot.*` y `nominal_overlay_diff.*`
+
+### EPIC-11 (Reporting)
+- [x] Precursor PDF desde artifacts: `engineering_report.pdf` (ADR-0007)
+- [ ] EPIC-11 “motor final” sigue pendiente (plantillas completas PDF/Excel/CSV)

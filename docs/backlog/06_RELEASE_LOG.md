@@ -21,7 +21,17 @@
   - Out-of-service boards (no se consideran si no están en network/assembly)
   - Tests unitarios EPIC-04.00
 
-## v0.4.1 (pendiente)
-- EPIC-04.01+: Network DSL runtime (build(network)) + degradación runtime (no bloqueante)
-- EPIC-04.01+: Conexión a cargas finales: `ends_at_load` (board virtual `LOAD:<TAG>`)
-- EPIC-04.01+: Reporte de compilación embebido (`compile_report`)
+## v0.4.1
+- EPIC-04.01: Load aggregation abajo→arriba (sin duplicación)
+- PF configurable + normalización de unidades
+- Artifacts: `load_report.json` / `load_report.md`
+- Vistas: feeder / assembly / collapsed / top feeders
+
+## v0.4.2
+- EPIC-04.02: DAG dirigido (roots/reachability/cycles/unreachable)
+- Artifacts: `dag_report.json` / `dag_report.md`
+
+## v0.4.3
+- EPIC-04.03: Tablas nominales JSON v0 + overlays segmentados
+- Artifacts: `nominal_snapshot.*` / `nominal_overlay_diff.*`
+- EPIC-11 precursor: PDF consolidado desde artifacts (`engineering_report.pdf`)
