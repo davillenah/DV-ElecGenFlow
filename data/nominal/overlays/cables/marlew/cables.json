@@ -1,6 +1,8 @@
 {
   "version": "v0",
   "kind": "cables",
+  "overlay": true,
+  "manufacturer": "IMSA",
   "items": [
     {
       "tag": "CU-XLPE-1C-25",

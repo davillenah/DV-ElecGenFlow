@@ -1,5 +1,6 @@
 # COMMIT LOG
 
+- 041) feat(epic-04.03): nominal tables v0 + overlays + loader + lookup + overlay diff + tests
 - 040) feat(epic-11): integrate PDF build; ignore invalid nominal overlays
 - 039) feat(epic-11): generate engineering_report.pdf with KPI cover and styled tables
 - 038) feat(epic-11): generate engineering_report.pdf from artifacts; ignore invalid overlays
