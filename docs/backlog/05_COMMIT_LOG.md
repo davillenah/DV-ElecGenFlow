@@ -1,5 +1,8 @@
 # COMMIT LOG
 
+- 036) test(epic-04.03): add tests for nominal loader, lookup and overlay diff
+- 035) feat(epic-04.03): nominal tables loader + lookup API + overlay diff artifacts + auto overlay scan
+- 034) chore(epic-04.03): add nominal tables v0 and vendor overlays structure
 - 033) docs: add ADRs for EPIC-04.01/04.02 and append backlog addendums
 - 032) test(epic-04.02): add DAG tests (roots, cycles, unreachable)
 - 031) feat(epic-04.02): DAG report (roots/reachability/cycles) + artifacts
