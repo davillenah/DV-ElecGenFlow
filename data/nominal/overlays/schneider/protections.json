@@ -1,0 +1,21 @@
+{
+  "version": "v0",
+  "kind": "protections",
+  "overlay": true,
+  "manufacturer": "SCHNEIDER",
+  "items": [
+    {
+      "tag": "MCCB-4P-250A-36kA",
+      "manufacturer": "SCHNEIDER",
+      "kind": "MCCB",
+      "poles": 4,
+      "rating_amps": 250,
+      "breaking_capacity_ka": 36,
+      "trip_unit": "TM",
+      "meta": {
+        "series": "ComPacT NSX",
+        "source": "datasheet"
+      }
+    }
+  ]
+}

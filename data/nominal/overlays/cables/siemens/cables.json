@@ -1,0 +1,36 @@
+{
+  "version": "v0",
+  "kind": "cables",
+  "items": [
+    {
+      "tag": "CU-XLPE-1C-25",
+      "manufacturer": "GENERIC",
+      "family": "CU-XLPE",
+      "material": "CU",
+      "insulation": "XLPE",
+      "jacket": "PVC",
+      "cores": 1,
+      "section_mm2": 25.0,
+      "voltage_class": "LV",
+      "ampacity_a": 105.0,
+      "resistance_ohm_km_20c": 0.727,
+      "meta": {
+        "notes": "Valores genéricos. Ajustar con tabla real en EPIC-04.03."
+      }
+    },
+    {
+      "tag": "CU-XLPE-4C-240",
+      "manufacturer": "GENERIC",
+      "family": "CU-XLPE",
+      "material": "CU",
+      "insulation": "XLPE",
+      "jacket": "PVC",
+      "cores": 4,
+      "section_mm2": 240.0,
+      "voltage_class": "LV",
+      "ampacity_a": 415.0,
+      "resistance_ohm_km_20c": 0.0754,
+      "meta": {}
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "version": "v0",
+  "kind": "install_methods",
+  "items": [
+    {
+      "tag": "BANDEJA",
+      "description": "Bandeja portacables",
+      "meta": {}
+    },
+    {
+      "tag": "DUCTO",
+      "description": "Conducto / cañería",
+      "meta": {}
+    },
+    {
+      "tag": "SUBTERRANEO",
+      "description": "Subterráneo",
+      "meta": {}
+    }
+  ]
+}
