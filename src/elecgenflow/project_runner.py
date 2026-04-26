@@ -8,6 +8,7 @@ from typing import Any, cast
 from elecgenflow.core.config import load_config
 from elecgenflow.core.engine import Engine
 from elecgenflow.domain.contracts.problem import DesignProblem
+from elecgenflow.engineering.directed_graph import DirectedElectricalGraphService
 from elecgenflow.engineering.load_aggregation import LoadAggregationService
 from elecgenflow.ingest.dsl_adapter import build_elecboard_ir
 from elecgenflow.ingest.import_utils import call_if_exists, import_module_from_path
@@ -83,7 +84,7 @@ def run_project(
 
     elecboard_ir = build_elecboard_ir(snapshots.boards_by_name, reg, compiled_links)
 
-    # EPIC-04.01-B: PF desde config
+    # EPIC-04.01: Load aggregation
     load_report = LoadAggregationService.aggregate(
         boards_by_name=cast(dict[str, dict[str, Any]], snapshots.boards_by_name),
         compiled_links=cast(list[dict[str, Any]], compiled_links),
@@ -93,6 +94,16 @@ def run_project(
         power_factor=cfg.power_factor_default,
     )
     load_md = LoadAggregationService.to_markdown(load_report)
+
+    # EPIC-04.02: DAG report
+    dag_report = DirectedElectricalGraphService.build_report(
+        compiled_links=cast(list[dict[str, Any]], compiled_links),
+        in_service_boards=set(reg.in_service_boards),
+        out_of_service_boards=set(reg.out_of_service_boards),
+        assembly_columns=dict(reg.assembly_columns),
+        include_assembly_edges=True,
+    )
+    dag_md = DirectedElectricalGraphService.to_markdown(dag_report)
 
     out_path = Path(out_dir)
     artifacts_dir = out_path / cfg.artifacts_subdir
@@ -104,6 +115,11 @@ def run_project(
         json.dumps(load_report, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     load_md_path.write_text(load_md, encoding="utf-8")
+
+    dag_json_path = artifacts_dir / "dag_report.json"
+    dag_md_path = artifacts_dir / "dag_report.md"
+    dag_json_path.write_text(json.dumps(dag_report, indent=2, ensure_ascii=False), encoding="utf-8")
+    dag_md_path.write_text(dag_md, encoding="utf-8")
 
     registry_snapshot = {
         "boards": sorted(reg.boards),
@@ -140,11 +156,14 @@ def run_project(
         "logical_ir": elecboard_ir.to_logical_ir_dict(),
         "electrical_ir": {
             "load_report": load_report,
+            "dag_report": dag_report,
             "registry_snapshot": registry_snapshot,
             "compile_report": compile_report,
             "artifacts": {
                 "load_report_json": str(load_json_path.as_posix()),
                 "load_report_md": str(load_md_path.as_posix()),
+                "dag_report_json": str(dag_json_path.as_posix()),
+                "dag_report_md": str(dag_md_path.as_posix()),
             },
         },
         "owner": snapshots.owner,
@@ -153,7 +172,7 @@ def run_project(
     problem = DesignProblem(
         problem_id=f"PROJECT:{project_root.name}",
         name=project_root.name,
-        description="Auto-loaded project + EPIC-04.01 load aggregation",
+        description="Auto-loaded project + EPIC-04.01 load aggregation + EPIC-04.02 DAG report",
         seed=cfg.default_seed,
         payload=payload,
     )
