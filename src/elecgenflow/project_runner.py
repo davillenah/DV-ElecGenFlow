@@ -17,6 +17,7 @@ from elecgenflow.engineering.nominal_tables import (
     nominal_snapshot,
     nominal_snapshot_md,
 )
+from elecgenflow.engineering.sizing_validation import CableSizingValidationService
 from elecgenflow.ingest.dsl_adapter import build_elecboard_ir
 from elecgenflow.ingest.import_utils import call_if_exists, import_module_from_path
 from elecgenflow.ingest.network_compiler import compile_network
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSnapshot]:
     """
-    Carga links del Network DSL en runtime.
+    Runtime loader para Network DSL.
     Preferencia:
       1) build(network) -> Network (fluent)
       2) build_network_snapshot() -> list[NetworkLinkSnapshot] (fallback)
@@ -72,6 +73,39 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
 
     data = call_if_exists(mod, "build_network_snapshot")
     return cast(list[NetworkLinkSnapshot], data) if isinstance(data, list) else []
+
+
+def _get_default_lv_vll(cfg: Any) -> float:
+    """
+    Usa cfg.voltages.lv[0] si existe (ej: [380, 220]).
+    Fallback: 380.
+    """
+    try:
+        volts = getattr(cfg, "voltages", None)
+        if volts is not None:
+            lv = getattr(volts, "lv", None)
+            if isinstance(lv, list) and lv:
+                return float(lv[0])
+    except Exception:
+        pass
+    return 380.0
+
+
+def _filter_valid_overlays(candidates: list[Path]) -> list[Path]:
+    """
+    Ignora overlays sin overlay=true (no bloqueante).
+    """
+    overlays: list[Path] = []
+    for p in candidates:
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and data.get("overlay") is True:
+                overlays.append(p)
+            else:
+                logger.warning("Ignoring nominal overlay (missing overlay=true): %s", p)
+        except Exception:
+            logger.warning("Ignoring nominal overlay (invalid json): %s", p)
+    return overlays
 
 
 def run_project(
@@ -134,13 +168,6 @@ def run_project(
         json.dumps(load_report, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     load_md_path.write_text(load_md, encoding="utf-8")
-    # EPIC-11 precursor: consolidated PDF from artifacts
-    pdf_path = artifacts_dir / "engineering_report.pdf"
-    pdf_res = build_engineering_pdf(
-        project_name=project_root.name,
-        artifacts_dir=artifacts_dir,
-        out_pdf=pdf_path,
-    )
 
     # ------------------------------------------------------------------
     # EPIC-04.02 — DAG report
@@ -160,15 +187,17 @@ def run_project(
     dag_md_path.write_text(dag_md, encoding="utf-8")
 
     # ------------------------------------------------------------------
-    # EPIC-04.03 — Nominal tables + overlay diff (AUTO overlays)
+    # EPIC-04.03 — Nominal tables + overlay diff (AUTO overlays, non-blocking)
     # ------------------------------------------------------------------
     root_nominal = Path(cfg.nominal_tables_root)
 
     if cfg.nominal_overlays:
-        overlays = [Path(x) for x in cfg.nominal_overlays]
+        candidates = [Path(x) for x in cfg.nominal_overlays]
     else:
         found = list(root_nominal.glob("overlays/**/*.json"))
-        overlays = sorted(found, key=lambda p: (len(p.parts), str(p)))
+        candidates = sorted(found, key=lambda p: (len(p.parts), str(p)))
+
+    overlays = _filter_valid_overlays(candidates)
 
     nominal_tables = load_nominal_tables(
         root=root_nominal,
@@ -199,6 +228,35 @@ def run_project(
         json.dumps(overlay_diff, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     overlay_md_path.write_text(overlay_diff_md, encoding="utf-8")
+
+    # ------------------------------------------------------------------
+    # EPIC-04.04 (starter) — Cable validation Ib vs Iz (3ph, Vll = voltages.lv[0])
+    # ------------------------------------------------------------------
+    vll = _get_default_lv_vll(cfg)
+
+    sizing_report = CableSizingValidationService.validate_feedrs(
+        load_report=load_report,
+        nominal=nominal_tables,
+        voltage_ll_v=float(vll),
+    )
+    sizing_md = CableSizingValidationService.to_markdown(sizing_report)
+
+    sizing_json_path = artifacts_dir / "sizing_report.json"
+    sizing_md_path = artifacts_dir / "sizing_report.md"
+    sizing_json_path.write_text(
+        json.dumps(sizing_report, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    sizing_md_path.write_text(sizing_md, encoding="utf-8")
+
+    # ------------------------------------------------------------------
+    # EPIC-11 precursor — PDF consolidated from artifacts
+    # ------------------------------------------------------------------
+    pdf_path = artifacts_dir / "engineering_report.pdf"
+    pdf_res = build_engineering_pdf(
+        project_name=project_root.name,
+        artifacts_dir=artifacts_dir,
+        out_pdf=pdf_path,
+    )
 
     # ------------------------------------------------------------------
     # Registry snapshot + compile report
@@ -244,8 +302,14 @@ def run_project(
             "dag_report": dag_report,
             "nominal_tables": nominal_json,
             "nominal_overlay_diff": overlay_diff,
+            "sizing_report": sizing_report,
             "registry_snapshot": registry_snapshot,
             "compile_report": compile_report,
+            "pdf_build": {
+                "enabled": pdf_res.enabled,
+                "pdf_path": pdf_res.pdf_path,
+                "reason": pdf_res.reason,
+            },
             "artifacts": {
                 "load_report_json": str(load_json_path.as_posix()),
                 "load_report_md": str(load_md_path.as_posix()),
@@ -255,12 +319,9 @@ def run_project(
                 "nominal_snapshot_md": str(nominal_md_path.as_posix()),
                 "nominal_overlay_diff_json": str(overlay_json_path.as_posix()),
                 "nominal_overlay_diff_md": str(overlay_md_path.as_posix()),
+                "sizing_report_json": str(sizing_json_path.as_posix()),
+                "sizing_report_md": str(sizing_md_path.as_posix()),
                 "engineering_report_pdf": str(pdf_path.as_posix()),
-            },
-            "pdf_build": {
-                "enabled": pdf_res.enabled,
-                "pdf_path": pdf_res.pdf_path,
-                "reason": pdf_res.reason,
             },
         },
         "owner": snapshots.owner,
@@ -269,7 +330,7 @@ def run_project(
     problem = DesignProblem(
         problem_id=f"PROJECT:{project_root.name}",
         name=project_root.name,
-        description="Auto-loaded project + EPIC-04.01/04.02/04.03",
+        description="Auto-loaded project + EPIC-04.01/04.02/04.03 + PDF + EPIC-04.04 starter",
         seed=cfg.default_seed,
         payload=payload,
     )
