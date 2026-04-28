@@ -8,6 +8,7 @@ from typing import Any, cast
 from elecgenflow.core.config import load_config
 from elecgenflow.core.engine import Engine
 from elecgenflow.domain.contracts.problem import DesignProblem
+from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
 from elecgenflow.engineering.directed_graph import DirectedElectricalGraphService
 from elecgenflow.engineering.load_aggregation import LoadAggregationService
 from elecgenflow.engineering.nominal_tables import (
@@ -77,7 +78,7 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
 
 def _get_default_lv_vll(cfg: Any) -> float:
     """
-    Usa cfg.voltages.lv[0] si existe (ej: [380, 220]).
+    Usa cfg.voltages.lv[0] si existe (ej: voltages.lv: [380, 220]).
     Fallback: 380.
     """
     try:
@@ -94,6 +95,7 @@ def _get_default_lv_vll(cfg: Any) -> float:
 def _filter_valid_overlays(candidates: list[Path]) -> list[Path]:
     """
     Ignora overlays sin overlay=true (no bloqueante).
+    Solo se aplican overlays con {"overlay": true}.
     """
     overlays: list[Path] = []
     for p in candidates:
@@ -230,14 +232,24 @@ def run_project(
     overlay_md_path.write_text(overlay_diff_md, encoding="utf-8")
 
     # ------------------------------------------------------------------
-    # EPIC-04.04 (starter) — Cable validation Ib vs Iz (3ph, Vll = voltages.lv[0])
+    # EPIC-04.04 — Auto-sizing sugerido (Ib vs Iz + suggested section)
     # ------------------------------------------------------------------
     vll = _get_default_lv_vll(cfg)
+
+    ampacity_path = root_nominal / str(cfg.nominal_tables_version) / "ampacity_aea.json"
+    ampacity = AmpacityCatalog.load(ampacity_path) if ampacity_path.exists() else None
+
+    # Default mapping if wire tag cannot be parsed (safe defaults)
+    default_key = AmpacityLookupKey(
+        material="cobre", insulation="PVC", metodo="B2", arrangement="3x"
+    )
 
     sizing_report = CableSizingValidationService.validate_feedrs(
         load_report=load_report,
         nominal=nominal_tables,
         voltage_ll_v=float(vll),
+        ampacity=ampacity,
+        default_ampacity_key=default_key,
     )
     sizing_md = CableSizingValidationService.to_markdown(sizing_report)
 
@@ -330,7 +342,7 @@ def run_project(
     problem = DesignProblem(
         problem_id=f"PROJECT:{project_root.name}",
         name=project_root.name,
-        description="Auto-loaded project + EPIC-04.01/04.02/04.03 + PDF + EPIC-04.04 starter",
+        description="Auto-loaded project + EPIC-04.01/04.02/04.03 + EPIC-04.04 suggested sizing + PDF",
         seed=cfg.default_seed,
         payload=payload,
     )

@@ -1,5 +1,6 @@
 # COMMIT LOG
 
+- 047) feat(epic-04.04): suggested auto-sizing (proposal) + sizing_report artifacts
 - 046) feat(epic-04.04): add AEA ampacity catalog + loader and tests
 - 045) feat(epic-04.04): sizing validation starter + sizing_report artifacts
 - 044) feat(epic-04.04): add AEA ampacity catalog (JSON) + loader and tests
