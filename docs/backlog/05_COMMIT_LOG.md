@@ -1,5 +1,8 @@
 # COMMIT LOG
 
+- 045) feat(epic-04.04): sizing validation starter + sizing_report artifacts
+- 044) feat(epic-04.04): add AEA ampacity catalog (JSON) + loader and tests
+- 043) feat(epic-04.04): sizing validation starter (Ib vs Iz) + sizing_report artifacts
 - 042) chore(release): bump version to 0.4.3
 - 041) feat(epic-04.03): nominal tables v0 + overlays + loader + lookup + overlay diff + tests
 - 040) feat(epic-11): integrate PDF build; ignore invalid nominal overlays
