@@ -237,7 +237,7 @@ class DirectedElectricalGraphService:
         lines.append("|---|---|---|---|")
         for e in dag_report.get("edges") or []:
             lines.append(
-                f"| {e.get('from','')} | {e.get('to','')} | {e.get('kind','')} | {e.get('wire','')} |"
+                f"| {e.get('from', '')} | {e.get('to', '')} | {e.get('kind', '')} | {e.get('wire', '')} |"
             )
 
         return "\n".join(lines)

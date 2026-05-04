@@ -10,7 +10,7 @@
 ## Paso a paso (pipeline end-to-end)
 
 ### 0) Setup / Proyecto
-- Detectar y cargar proyecto desde estructura `Project/Plant/...`
+- Detectar y cargar proyecto desde estructura `Project/Plant/...` o estructura nueva `Project/Boards + Project/Networks`.
 - Validar que el proyecto es “reproducible” (manifest + seed).
 
 ### 1) Ingesta canónica (DSL)
@@ -48,9 +48,13 @@
 - Ingesta de tablas versionadas (cables, protecciones, métodos, condiciones).
 - Overlay de catálogos por fabricante/familia/modelo.
 
-### 9) Validación técnica (sin automatizar todavía)
-- Validaciones Ib/In/Iz, caída de tensión inicial, coherencia cable/protección/carga.
-- Reportar violaciones y warnings con trazabilidad normativa.
+### 9) Validación técnica (EPIC‑04.04)
+- Calcula Ib (desde kVA y Vll).
+- Aplica reserva configurada (Ib_design).
+- Soporta cables en paralelo (Ib_per_cable = Ib_design / parallel).
+- Consulta ampacidad AEA y sugiere sección mínima que cumple (Iz >= Ib_per_cable).
+- Artifacts: `sizing_report.*`, `cable_schedule.*`, `selected_wires.json`.
+- Pendiente: coordinación Ib/In/Iz (protección), derating completo y caída de tensión.
 
 ### 10) Simulación + métricas (pandapower)
 - Flujo de carga, pérdidas, caídas, carga de trafos, etc.
@@ -86,16 +90,11 @@
 ---
 
 ## Estado actual (resumen)
-- v0.4.0 completó la base de entrada canónica (DSL + Registry + Adapter + tests). [1](https://onedrive.live.com/?id=208775ff-41a4-49af-93c7-6fba5522804f&cid=8ee4e9ff1a66676a&web=1)
-- Próximo: cargas (04.01) y DAG (04.02), luego tablas (04.03) y validación (04.04).
-
----
-
-## ADDENDUM (pre-release v0.4.3) — Estado actualizado
-
+- v0.4.0 completó la base de entrada canónica (DSL + Registry + Adapter + tests).
 - v0.4.1: EPIC-04.01 — Load aggregation + artifacts (`load_report.*`)
 - v0.4.2: EPIC-04.02 — DAG dirigido + artifacts (`dag_report.*`)
-- v0.4.3: EPIC-04.03 — Nominal tables v0 + overlays + snapshot/diff artifacts (`nominal_*`)
-- v0.4.3: EPIC-11 precursor — PDF consolidado desde artifacts (`engineering_report.pdf`)
+- v0.4.3: EPIC-04.03 — Nominal tables v0 + overlays + artifacts (`nominal_*.*`)
+- v0.4.3+: EPIC-04.04 — Validación + auto‑sugerencia + cable schedule (`sizing_report.*`, `cable_schedule.*`, `selected_wires.json`)
+- v0.4.3+: EPIC-11 precursor — PDF desde artifacts (`engineering_report.pdf`)
 
-Próximo paso: EPIC-04.04 — validación Ib/In/Iz + caída de tensión inicial (sin sizing automático).
+Próximo paso: EPIC‑04.04+ — coordinación Ib/In/Iz (protección), derating completo (k_group/k_temp/k_soil) y caída de tensión inicial.

@@ -116,7 +116,9 @@ class AmpacityCatalog:
         material = (
             "cobre"
             if mat_raw.upper() in {"CU", "COBRE"}
-            else "aluminio" if mat_raw.upper() in {"AL", "ALUMINIO"} else ""
+            else "aluminio"
+            if mat_raw.upper() in {"AL", "ALUMINIO"}
+            else ""
         )
         if not material:
             return None

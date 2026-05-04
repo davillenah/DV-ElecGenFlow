@@ -1,3 +1,5 @@
+# src/elecgenflow/core/config.py
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -18,6 +20,30 @@ class VoltageConfig(BaseModel):
     mv: list[int] = Field(default_factory=lambda: [13200, 33000])
 
 
+class SizingConfig(BaseModel):
+    """
+    Configuración para dimensionamiento automático.
+    Mantiene rutas a tablas nominales y algunos defaults operativos.
+    """
+
+    enabled: bool = True
+
+    # PF por defecto (solo si una carga viene en kW sin kVA)
+    power_factor_default: float = Field(default=0.85, ge=0.0, le=1.0)
+
+    # Tablas nominales
+    nominal_tables_root: str = "data/nominal"
+    nominal_tables_version: str = "v0"
+    nominal_overlays: list[str] = Field(default_factory=list)
+
+    # Nombres de archivos nominales
+    ampacity_filename: str = "ampacity_aea.json"
+    derating_filename: str = "derating_defaults.json"
+
+    # Artefacto de salida del sizing
+    sizing_results_filename: str = "sizing_results.json"
+
+
 class EngineConfig(BaseModel):
     """Configuración global del motor (defaults AR + flags).
 
@@ -34,13 +60,14 @@ class EngineConfig(BaseModel):
 
     artifacts_subdir: str = "artifacts"
 
-    # EPIC-04.01-B
+    # Defaults históricos (se mantienen para compatibilidad con configs viejas)
     power_factor_default: float = Field(default=0.85, ge=0.0, le=1.0)
-
-    # EPIC-04.03
     nominal_tables_root: str = "data/nominal"
     nominal_tables_version: str = "v0"
     nominal_overlays: list[str] = Field(default_factory=list)
+
+    # Config preferida para sizing (se puede sobreescribir desde YAML)
+    sizing: SizingConfig = Field(default_factory=SizingConfig)
 
 
 def load_config(path: Path) -> EngineConfig:

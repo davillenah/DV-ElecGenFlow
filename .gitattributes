@@ -1,0 +1,7 @@
+# Normaliza texto y fuerza LF en repo
+* text=auto eol=lf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.pdf binary

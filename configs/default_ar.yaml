@@ -14,6 +14,7 @@ deterministic: true
 artifacts_subdir: artifacts
 
 power_factor_default: 0.85
+cable_reserve_pct: 15
 
 nominal_tables_root: data/nominal
 nominal_tables_version: v0

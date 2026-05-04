@@ -1,3 +1,4 @@
+# src/elecgenflow/reporting/pdf_report.py
 from __future__ import annotations
 
 import json
@@ -39,7 +40,13 @@ def _iter_md_lines(md: str) -> Iterable[str]:
         yield line.rstrip("\n")
 
 
+# --- original (kept for compatibility, but not used)
 def _escape_html(s: str) -> str:
+    return s.replace("&amp;", "&amp;amp;").replace("&lt;", "&amp;lt;").replace("&gt;", "&amp;gt;")
+
+
+# ✅ added correct escape; we use this one
+def _escape_html_safe(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
@@ -81,7 +88,6 @@ def _is_separator_row(cells: list[str]) -> bool:
 
 def _theme_styles() -> Any:
     styles = getSampleStyleSheet()
-
     styles.add(
         ParagraphStyle(
             name="EGF_Title",
@@ -206,7 +212,7 @@ def _table_from_markdown_lines(table_lines: list[str], *, styles: Any) -> Table:
         out_row: list[Any] = []
         for c in row:
             st = head_style if r_idx == 0 else body_style
-            out_row.append(Paragraph(_escape_html(c), st))
+            out_row.append(Paragraph(_escape_html_safe(c), st))
         formatted.append(out_row)
 
     cols = max(len(r) for r in formatted)
@@ -245,7 +251,10 @@ def _kpi_box(kpis: list[list[str]], *, styles: Any) -> Table:
     formatted: list[list[Any]] = []
     for k, v in kpis:
         formatted.append(
-            [Paragraph(_escape_html(k), label_style), Paragraph(_escape_html(v), value_style)]
+            [
+                Paragraph(_escape_html_safe(k), label_style),
+                Paragraph(_escape_html_safe(v), value_style),
+            ]
         )
 
     t = Table(formatted, colWidths=[6.0 * cm, A4[0] - 4.0 * cm - 6.0 * cm])
@@ -274,7 +283,7 @@ def _parse_markdown_to_flowables(md: str, *, title: str, styles: Any) -> list[An
     mono = styles["EGF_Mono"]
 
     flow: list[Any] = []
-    flow.append(Paragraph(_escape_html(title), h1))
+    flow.append(Paragraph(_escape_html_safe(title), h1))
     flow.append(Spacer(1, 0.25 * cm))
 
     in_code = False
@@ -306,7 +315,7 @@ def _parse_markdown_to_flowables(md: str, *, title: str, styles: Any) -> list[An
             continue
 
         if in_code:
-            code_buf.append(_escape_html(line))
+            code_buf.append(_escape_html_safe(line))
             continue
 
         if _is_table_line(line):
@@ -330,19 +339,19 @@ def _parse_markdown_to_flowables(md: str, *, title: str, styles: Any) -> list[An
             continue
 
         if s.startswith("# "):
-            flow.append(Paragraph(_escape_html(s[2:]), h1))
+            flow.append(Paragraph(_escape_html_safe(s[2:]), h1))
             continue
         if s.startswith("## "):
-            flow.append(Paragraph(_escape_html(s[3:]), h2))
+            flow.append(Paragraph(_escape_html_safe(s[3:]), h2))
             continue
         if s.startswith("### "):
-            flow.append(Paragraph(_escape_html(s[4:]), h3))
+            flow.append(Paragraph(_escape_html_safe(s[4:]), h3))
             continue
         if s.startswith("- "):
-            flow.append(Paragraph(f"• {_escape_html(s[2:])}", body))
+            flow.append(Paragraph(f"• {_escape_html_safe(s[2:])}", body))
             continue
 
-        flow.append(Paragraph(_escape_html(s), body))
+        flow.append(Paragraph(_escape_html_safe(s), body))
 
     if in_table:
         flush_table()
@@ -361,15 +370,19 @@ def _kpi_cover_flowables(*, project_name: str, artifacts_dir: Path, styles: Any)
     dag_json = _read_json(artifacts_dir / "dag_report.json") or {}
     nominal_snap = _read_json(artifacts_dir / "nominal_snapshot.json") or {}
     nominal_diff = _read_json(artifacts_dir / "nominal_overlay_diff.json") or {}
+    sizing = _read_json(artifacts_dir / "sizing_report.json") or {}
+    cable_schedule = _read_json(artifacts_dir / "cable_schedule.json") or {}
 
     pf = load_json.get("power_factor", "n/a")
     roots = load_json.get("roots") or []
     sys_total = load_json.get("system_total") or {}
-    sys_kw = sys_total.get("kW")
     sys_kva = sys_total.get("kVA")
-
-    ins = load_json.get("in_service") or {}
-    top_feed = ins.get("feeders_top_kva") or []
+    sys_va: float | None = None
+    try:
+        if sys_kva is not None:
+            sys_va = float(sys_kva) * 1000.0
+    except Exception:
+        sys_va = None
 
     dag_roots = dag_json.get("roots") or []
     dag_nodes = dag_json.get("nodes") or []
@@ -383,18 +396,18 @@ def _kpi_cover_flowables(*, project_name: str, artifacts_dir: Path, styles: Any)
     meth_n = counts.get("install_methods")
 
     overlays = nominal_diff.get("overlays") or []
-    prot_diff = nominal_diff.get("protections") or {}
-    prot_changed = (
-        len((prot_diff.get("changed") or {}).keys())
-        if isinstance(prot_diff.get("changed"), dict)
-        else 0
-    )
-    prot_added = (
-        len(prot_diff.get("added") or []) if isinstance(prot_diff.get("added"), list) else 0
-    )
-    prot_removed = (
-        len(prot_diff.get("removed") or []) if isinstance(prot_diff.get("removed"), list) else 0
-    )
+
+    sizing_sum = sizing.get("summary") or {}
+    suggested_n = sizing_sum.get("suggested")
+
+    reserve_pct = None
+    try:
+        reserve_pct = sizing.get("assumptions", {}).get("cable_reserve_pct")
+    except Exception:
+        reserve_pct = None
+
+    schedule_rows = cable_schedule.get("rows") if isinstance(cable_schedule, dict) else None
+    schedule_count = len(schedule_rows) if isinstance(schedule_rows, list) else None
 
     flow: list[Any] = []
     flow.append(Paragraph("ElecGenFlow — Engineering Report", title))
@@ -409,7 +422,8 @@ def _kpi_cover_flowables(*, project_name: str, artifacts_dir: Path, styles: Any)
     kpis = [
         ["PF usado", _fmt_num(pf, 3) if pf != "n/a" else "n/a"],
         ["Roots (Load)", ", ".join(roots) if roots else "(none)"],
-        ["Total sistema", f"{_fmt_num(sys_kw)} kW | {_fmt_num(sys_kva)} kVA"],
+        ["Total sistema (kVA)", _fmt_num(sys_kva, 3) if sys_kva is not None else "n/a"],
+        ["Total sistema (VA)", _fmt_num(sys_va, 0) if sys_va is not None else "n/a"],
         ["DAG roots", ", ".join(dag_roots) if dag_roots else "(none)"],
         ["DAG estado", f"nodes={len(dag_nodes)} edges={len(dag_edges)} cycle={dag_has_cycle}"],
         ["DAG unreachable", f"{len(dag_unreachable)}"],
@@ -417,35 +431,19 @@ def _kpi_cover_flowables(*, project_name: str, artifacts_dir: Path, styles: Any)
             "Nominal tables",
             f"cables={_fmt_int(cables_n)} protections={_fmt_int(prot_n)} methods={_fmt_int(meth_n)}",
         ],
-        [
-            "Overlays",
-            f"{len(overlays) if isinstance(overlays, list) else 0} | prot +{prot_added} -{prot_removed} ~{prot_changed}",
-        ],
+        ["Overlays aplicados", f"{len(overlays) if isinstance(overlays, list) else 0}"],
+        ["Sizing sugerencias", _fmt_int(suggested_n)],
+        ["Reserva cable (%)", _fmt_num(reserve_pct, 1) if reserve_pct is not None else "n/a"],
+        ["Cables en schedule", _fmt_int(schedule_count)],
     ]
     flow.append(_kpi_box(kpis, styles=styles))
     flow.append(Spacer(1, 0.35 * cm))
-
-    if isinstance(top_feed, list) and top_feed:
-        flow.append(Paragraph("Top Feeders (kVA) — vista rápida", h2))
-        lines: list[str] = []
-        lines.append("| From | To | Wire | kW | kVA |")
-        lines.append("|---|---|---|---:|---:|")
-        for f in top_feed[:5]:
-            dt = f.get("downstream_total") or {}
-            lines.append(
-                f"| {f.get('from_board','')} | {f.get('to','')} | {f.get('wire','')} | "
-                f"{_fmt_num(dt.get('kW'))} | {_fmt_num(dt.get('kVA'))} |"
-            )
-        flow.append(_table_from_markdown_lines(lines, styles=styles))
 
     return flow
 
 
 def build_engineering_pdf(
-    *,
-    project_name: str,
-    artifacts_dir: Path,
-    out_pdf: Path,
+    *, project_name: str, artifacts_dir: Path, out_pdf: Path
 ) -> PdfBuildResult:
     styles = _theme_styles()
 
@@ -454,6 +452,8 @@ def build_engineering_pdf(
         ("DAG Report (EPIC-04.02)", artifacts_dir / "dag_report.md"),
         ("Nominal Tables Snapshot (EPIC-04.03)", artifacts_dir / "nominal_snapshot.md"),
         ("Nominal Overlay Diff (EPIC-04.03)", artifacts_dir / "nominal_overlay_diff.md"),
+        ("Sizing Report (EPIC-04.04)", artifacts_dir / "sizing_report.md"),
+        ("Cable Schedule (EPIC-04.04)", artifacts_dir / "cable_schedule.md"),
     ]
 
     doc = SimpleDocTemplate(

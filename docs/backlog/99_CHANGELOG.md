@@ -26,6 +26,17 @@ All notable changes to this project will be documented in this file.
 - (placeholder) Integration Layer (IFC/DXF/JSON Import-Export) | (EPIC-17.00)
 - (placeholder) RBAC (Role-Based Access Control) & Audit Logs | (EPIC-18.00)
 
+## [0.4.4] - 2026-04-17
+### Added
+- EPIC-04.04: Auto-sugerencia de sección por ampacidad (AEA) con reserva % y soporte de paralelos (Ib/cable).
+- EPIC-04.04: Cable Schedule artifact (`cable_schedule.json/.md`) y snapshot canónico (`selected_wires.json`).
+- EPIC-04.04: Catálogos técnicos base: ampacity AEA + derating defaults (JSON) para evolución futura.
+- EPIC-11 precursor: PDF desde artifacts ampliado con secciones técnicas (memoria + anexos de fórmulas/trazabilidad).
+- Compat: shims para rutas legacy (imports) sin romper tests ni módulos existentes.
+
+### Changed
+- Project runner: pipeline genera artifacts adicionales del sizing y consolida outputs reproducibles.
+- Ingest/Network compiler: normaliza wire_config en meta para consumo consistente en sizing.
 
 ## [0.4.3] - 2026-04-26
 ### Added

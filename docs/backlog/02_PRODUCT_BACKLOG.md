@@ -54,13 +54,22 @@
   - Artifacts: nominal_snapshot / nominal_overlay_diff
 
 ## EPIC-04.04: Sizing and Validation Engine (modo validación)
-- Estado: Pendiente
+- Estado: En Proceso (parcial)
 - Release: v0.4.4
 - Macro objetivo: Paso 9
 - Requerimientos:
   - CableContext (wire + protección + carga downstream).
   - Validaciones Ib/In/Iz + caída de tensión inicial.
   - Reportes de violaciones/warnings con evidencia.
+- Entrega parcial:
+  - Validación Ib vs Iz
+  - Auto-sugerencia de sección por ampacidad (AEA)
+  - Cable schedule + selected_wires
+- Pendiente:
+  - Coordinación Ib/In/Iz (protección)
+  - Derating completo por agrupamiento/temperatura/suelo
+  - Caída de tensión inicial
+
 
 ## EPIC-05.00: Real Electrical Model (Lines/Loads)
 - Estado: Pendiente

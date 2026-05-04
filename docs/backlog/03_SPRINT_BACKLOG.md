@@ -75,14 +75,16 @@ DoD:
 ## Sprint EPIC-04.04 — Validación (sin sizing automático) (PRIORIDAD 4)
 Objetivo (ROADMAP Paso 9): validar selección manual.
 
-Entregables:
-- CableContextResolver (wire + protección + carga)
-- Validaciones iniciales:
-  - Ib/In/Iz
-  - caída de tensión inicial
-- Reporte de violaciones/warnings:
-  - severidad
-  - evidencia normativa (placeholder trazable)
+Entregables (DONE):
+- Validación Ib vs Iz + reserva %.
+- Auto-sugerencia de sección mínima por ampacidad AEA.
+- Artifacts: sizing_report + cable_schedule + selected_wires.
+- CI verde.
+
+Entregables (PENDING):
+- Coordinación Ib/In/Iz (protección) + propuesta In.
+- Derating completo: k_group/k_temp/k_soil usando grouped + condiciones de entorno.
+- Caída de tensión inicial.
 
 DoD:
 - CI verde

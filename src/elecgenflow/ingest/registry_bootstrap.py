@@ -1,3 +1,5 @@
+# src/elecgenflow/ingest/registry_bootstrap.py
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -5,18 +7,26 @@ from typing import Any
 
 from .payload_models import AssemblySnapshot, BoardSnapshot, NetworkLinkSnapshot
 
+# Tag por defecto para el “entrypoint” (protección principal) cuando no viene explícito.
 ENTRYPOINT_TAG = "IG"
 
 
 @dataclass
 class RegistryIndex:
+    """
+    Índice “rápido” para inferir y validar entidades del proyecto a partir de snapshots:
+      - boards/columns/terminales/protecciones/wires/loads
+      - in_service / out_of_service
+      - degradación runtime (no bloqueante)
+    """
+
     boards: set[str] = field(default_factory=set)
     columns: set[tuple[str, str]] = field(default_factory=set)  # (owner, col)
 
     protections_entry: set[tuple[str, str]] = field(default_factory=set)  # (board, tag)
     protections_end: set[tuple[str, str]] = field(default_factory=set)  # (board, tag)
 
-    terminals: set[tuple[str, str]] = field(default_factory=set)
+    terminals: set[tuple[str, str]] = field(default_factory=set)  # (board, terminal_tag)
     wires: set[str] = field(default_factory=set)
 
     loads: set[str] = field(default_factory=set)  # cargas finales (virtuales)
@@ -24,6 +34,7 @@ class RegistryIndex:
     in_service_boards: set[str] = field(default_factory=set)
     out_of_service_boards: set[str] = field(default_factory=set)
 
+    # assembly -> { "COL-01": "BoardName", ... }
     assembly_columns: dict[str, dict[str, str]] = field(default_factory=dict)
 
     # runtime degradation (no bloqueante)
@@ -36,6 +47,9 @@ class RegistryIndex:
 
 
 def _iter_circuits(board: BoardSnapshot) -> list[dict[str, Any]]:
+    """
+    Extrae todos los circuitos declarados en buses, incluyendo subcircuits.
+    """
     buses = board.get("buses") or []
     circuits: list[dict[str, Any]] = []
     for b in buses:
@@ -44,6 +58,12 @@ def _iter_circuits(board: BoardSnapshot) -> list[dict[str, Any]]:
 
 
 def _infer_endpoints_from_buses(board_name: str, snap: BoardSnapshot, reg: RegistryIndex) -> None:
+    """
+    Fallback cuando el board snapshot no trae lista explícita de 'endpoints'.
+    Infiera:
+      - entrypoint: main_protection (si existe)
+      - endpoints: protections en circuitos y subcircuits (si existen)
+    """
     mp = snap.get("main_protection") or {}
     if isinstance(mp, dict) and mp:
         tag_any = mp.get("tag", ENTRYPOINT_TAG)
@@ -70,14 +90,30 @@ def bootstrap_registry(
     assemblies: list[AssemblySnapshot],
     network_links: list[NetworkLinkSnapshot],
 ) -> RegistryIndex:
+    """
+    Construye un índice de entidades presentes en:
+      - boards_by_name (tableros)
+      - assemblies (armados/columnas)
+      - network_links (conexiones/cables/cargas)
+
+    Nota:
+      - Este módulo NO debe construir catálogos técnicos (ampacidad/derating/RX).
+        Eso corresponde al Core/Engine bootstrap (p.ej. core/catalog_provider.py) y
+        se inyecta al motor de dimensionamiento desde el inicializador del proyecto.
+    """
     reg = RegistryIndex()
 
+    # 1) boards “declarados” explícitamente
     for name in boards_by_name:
-        reg.boards.add(name)
+        if isinstance(name, str) and name:
+            reg.boards.add(name)
 
-    # assemblies → columnas
+    # 2) assemblies → columnas + boards en servicio
     for asm in assemblies:
         asm_name = str(asm.get("name"))
+        if not asm_name:
+            continue
+
         reg.boards.add(asm_name)
         reg.assembly_columns.setdefault(asm_name, {})
 
@@ -86,7 +122,10 @@ def bootstrap_registry(
             idx_raw = c.get("index")
             if idx_raw is None:
                 continue
-            idx = int(idx_raw)
+            try:
+                idx = int(idx_raw)
+            except (TypeError, ValueError):
+                continue
 
             board_tag_raw = c.get("board")
             if not isinstance(board_tag_raw, str) or not board_tag_raw:
@@ -98,12 +137,15 @@ def bootstrap_registry(
             reg.assembly_columns[asm_name][col_tag] = board_tag
             reg.in_service_boards.add(board_tag)
 
-    # boards → endpoints/entrypoints
+    # 3) boards → endpoints/entrypoints/terminales/columnas (si vienen explícitos)
     for board_name, snap in boards_by_name.items():
         endpoints = snap.get("endpoints")
 
         if isinstance(endpoints, list) and endpoints:
             for e in endpoints:
+                if not isinstance(e, dict):
+                    continue
+
                 role = e.get("role")
                 kind = e.get("kind")
                 tag = e.get("tag")
@@ -120,9 +162,10 @@ def bootstrap_registry(
                 if kind == "column" and isinstance(tag, str) and tag:
                     reg.columns.add((board_name, tag))
         else:
+            # Fallback: inferir desde buses/circuitos
             _infer_endpoints_from_buses(board_name, snap, reg)
 
-    # network links → in_service + wires + loads
+    # 4) network links → in_service + wires + loads
     for lk in network_links:
         o = lk.get("origin") or {}
         d = lk.get("destination") or {}
@@ -143,5 +186,6 @@ def bootstrap_registry(
         if isinstance(wire, str) and wire:
             reg.wires.add(wire)
 
+    # 5) boards fuera de servicio = declarados - en servicio
     reg.out_of_service_boards = set(reg.boards) - set(reg.in_service_boards)
     return reg

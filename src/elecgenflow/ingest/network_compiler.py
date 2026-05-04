@@ -1,3 +1,5 @@
+# src/elecgenflow/ingest/network_compiler.py
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -89,6 +91,69 @@ def _resolve_origin_board_if_assembly(
     origin2["board"] = board_real
     origin2["column"] = col
     return board_real, origin2, ob
+
+
+def _dict_or_empty(x: Any) -> dict[str, Any]:
+    return x if isinstance(x, dict) else {}
+
+
+def _normalize_wire_config_from_sources(
+    *,
+    link: dict[str, Any],
+    meta: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Construye un bloque uniforme de configuración de wire.
+
+    Prioridad:
+      1) lk["wire_config"] si existe y es dict
+      2) lk["configured_as"] si existe y es dict
+      3) meta["wire_config"] si existe y es dict
+      4) campos planos en meta / link (conductor/insulation/installed_in/multipolar/unipolar...)
+
+    Resultado:
+      - dict estable que el sizing puede consumir siempre en meta["wire_config"].
+    """
+    wc = _dict_or_empty(link.get("wire_config"))
+    if wc:
+        return dict(wc)
+
+    cfg = _dict_or_empty(link.get("configured_as"))
+    if cfg:
+        return dict(cfg)
+
+    mwc = _dict_or_empty(meta.get("wire_config"))
+    if mwc:
+        return dict(mwc)
+
+    # Fallback: campos planos
+    out: dict[str, Any] = {}
+    for k in (
+        "conductor",
+        "insulation",
+        "installed_in",
+        "method",
+        "form",
+        "cable_form",
+        "multipolar",
+        "unipolar",
+        "ambient_air_c",
+        "grouped_circuits",
+        "soil_resistivity",
+        "burial_depth_m",
+        "tag",
+        "circuit_tag",
+        # hints de protección si vienen desde DSL
+        "protection_type",
+        "device_type",
+        "protection_in_a",
+        "protection_i2_a",
+    ):
+        if k in meta:
+            out[k] = meta.get(k)
+        elif k in link:
+            out[k] = link.get(k)
+    return out
 
 
 def compile_network(
@@ -285,6 +350,11 @@ def compile_network(
             ld = str(load_any)
             if ld:
                 reg.loads.add(ld)
+
+        # ✅ NUEVO: normalizar y guardar configuración del wire
+        wire_cfg = _normalize_wire_config_from_sources(link=dict(lk), meta=meta)
+        if wire_cfg:
+            meta["wire_config"] = wire_cfg
 
         meta["compiled"] = True
 

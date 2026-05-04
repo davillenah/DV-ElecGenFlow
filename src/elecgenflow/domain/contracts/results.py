@@ -1,3 +1,5 @@
+# src/elecgenflow/domain/contracts/results.py
+
 from __future__ import annotations
 
 from typing import Any, Literal

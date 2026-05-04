@@ -2,13 +2,52 @@
   "version": "v0",
   "kind": "protections",
   "overlay": true,
-  "manufacturer": "SCHNEIDER",
+  "manufacturer": "Schneider Electric",
   "items": [
     {
-      "tag": "MCCB-4P-250A-36kA",
-      "manufacturer": "SCHNEIDER",
-      "kind": "MCCB",
+      "tag": "MCB-4P-250A-36kA",
+      "manufacturer": "Schneider Electric",
+      "kind": "MCB",
       "poles": 4,
+      "rating_amps": 250,
+      "breaking_capacity_ka": 36,
+      "trip_unit": "TM",
+      "meta": {
+        "series": "ComPacT NSX",
+        "source": "datasheet"
+      }
+    },
+    {
+      "tag": "MCB-3P-250A-36kA",
+      "manufacturer": "Schneider Electric",
+      "kind": "MCB",
+      "poles": 3,
+      "rating_amps": 250,
+      "breaking_capacity_ka": 36,
+      "trip_unit": "TM",
+      "meta": {
+        "series": "ComPacT NSX",
+        "source": "datasheet"
+      }
+    },
+    {
+      "tag": "MCB-2P-250A-36kA",
+      "manufacturer": "Schneider Electric",
+      "kind": "MCB",
+      "poles": 2,
+      "rating_amps": 250,
+      "breaking_capacity_ka": 36,
+      "trip_unit": "TM",
+      "meta": {
+        "series": "ComPacT NSX",
+        "source": "datasheet"
+      }
+    },
+    {
+      "tag": "MCB-1P-250A-36kA",
+      "manufacturer": "Schneider Electric",
+      "kind": "MCB",
+      "poles": 1,
       "rating_amps": 250,
       "breaking_capacity_ka": 36,
       "trip_unit": "TM",

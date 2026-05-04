@@ -35,3 +35,9 @@
 - EPIC-04.03: Tablas nominales JSON v0 + overlays segmentados
 - Artifacts: `nominal_snapshot.*` / `nominal_overlay_diff.*`
 - EPIC-11 precursor: PDF consolidado desde artifacts (`engineering_report.pdf`)
+
+## v0.4.4
+- EPIC-04.04: Auto-sugerencia de sección + cable schedule + selected_wires snapshot.
+- PDF precursor: mejora de estructura técnica (memoria + anexos).
+- Derating defaults JSON agregado (base para k_group/k_temp/k_soil).
+- Refactors de imports con compat shims para estabilidad de CI.

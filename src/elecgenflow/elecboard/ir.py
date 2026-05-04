@@ -32,7 +32,7 @@ def _parse_phases(value: Any) -> set[Phase]:
     if value is None:
         return set()
 
-    raw = list(value) if isinstance(value, (list, tuple, set, frozenset)) else [value]
+    raw = list(value) if isinstance(value, list | tuple | set | frozenset) else [value]
 
     parsed: set[Phase] = set()
     for v in raw:

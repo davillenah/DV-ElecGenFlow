@@ -1,3 +1,4 @@
+# src/elecgenflow/ingest/payload_models.py
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -34,6 +35,10 @@ class NetworkLinkSnapshot(TypedDict, total=False):
     destination: EndpointSnapshot
     wire: str
     meta: dict[str, Any]
+
+    # ✅ agregado (no rompe nada viejo)
+    wire_id: str
+    wire_config: dict[str, Any]
 
 
 class AssemblyColumnSnapshot(TypedDict, total=False):

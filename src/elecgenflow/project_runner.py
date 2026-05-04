@@ -1,3 +1,5 @@
+# src/elecgenflow/project_runner.py
+
 from __future__ import annotations
 
 import json
@@ -5,12 +7,15 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
+from src.elecgenflow.engineering.sizing.load_aggregation import LoadAggregationService
+from src.elecgenflow.engineering.sizing.sizing_validation import CableSizingValidationService
+
 from elecgenflow.core.config import load_config
 from elecgenflow.core.engine import Engine
 from elecgenflow.domain.contracts.problem import DesignProblem
 from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
+from elecgenflow.engineering.cable_schedule import CableScheduleService
 from elecgenflow.engineering.directed_graph import DirectedElectricalGraphService
-from elecgenflow.engineering.load_aggregation import LoadAggregationService
 from elecgenflow.engineering.nominal_tables import (
     load_nominal_tables,
     nominal_overlay_diff,
@@ -18,7 +23,6 @@ from elecgenflow.engineering.nominal_tables import (
     nominal_snapshot,
     nominal_snapshot_md,
 )
-from elecgenflow.engineering.sizing_validation import CableSizingValidationService
 from elecgenflow.ingest.dsl_adapter import build_elecboard_ir
 from elecgenflow.ingest.import_utils import call_if_exists, import_module_from_path
 from elecgenflow.ingest.network_compiler import compile_network
@@ -51,25 +55,49 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
         for lk in net.links:
             origin = lk.origin
             dest = lk.destination
-            links.append(
-                {
-                    "origin": {
-                        "board": cast(Any, origin.board),
-                        "column": origin.column,
-                        "protection": origin.protection,
-                        "terminal": origin.terminal,
-                    },
-                    "destination": {
-                        "board": cast(Any, dest.board),
-                        "column": dest.column,
-                        "protection": dest.protection,
-                        "terminal": dest.terminal,
-                        "load": dest.load,
-                    },
-                    "wire": lk.wire,
-                    "meta": lk.meta,
-                }
+
+            # Compat + nuevo DSL:
+            wire_id = getattr(lk, "wire_id", None)
+            wire_tag = getattr(lk, "wire_tag", None)
+            wire_legacy = getattr(lk, "wire", None)
+
+            # Esto asegura que siempre haya "wire" para el pipeline existente
+            wire_value = wire_legacy or wire_tag or wire_id or ""
+
+            wire_config_obj = getattr(lk, "wire_config", None)
+            wire_config = (
+                wire_config_obj.to_dict()
+                if wire_config_obj is not None and hasattr(wire_config_obj, "to_dict")
+                else {}
             )
+
+            # ✅ Base snapshot (TypedDict safe)
+            snap: NetworkLinkSnapshot = {
+                "origin": {
+                    "board": cast(Any, origin.board),
+                    "column": origin.column,
+                    "protection": origin.protection,
+                    "terminal": origin.terminal,
+                },
+                "destination": {
+                    "board": cast(Any, dest.board),
+                    "column": dest.column,
+                    "protection": dest.protection,
+                    "terminal": dest.terminal,
+                    "load": dest.load,
+                },
+                "wire": str(wire_value),
+                "meta": getattr(lk, "meta", {}) or {},
+            }
+
+            # ✅ Add optional keys only when valid (fix mypy)
+            if isinstance(wire_id, str) and wire_id:
+                snap["wire_id"] = wire_id
+            if isinstance(wire_config, dict) and wire_config:
+                snap["wire_config"] = wire_config
+
+            links.append(snap)
+
         return links
 
     data = call_if_exists(mod, "build_network_snapshot")
@@ -90,6 +118,19 @@ def _get_default_lv_vll(cfg: Any) -> float:
     except Exception:
         pass
     return 380.0
+
+
+def _get_cable_reserve_pct(cfg: Any) -> float:
+    """
+    Reserva (%) para el cable.
+    Agregar en YAML:
+      cable_reserve_pct: 15
+    """
+    try:
+        v = getattr(cfg, "cable_reserve_pct", 0.0)
+        return float(v)
+    except Exception:
+        return 0.0
 
 
 def _filter_valid_overlays(candidates: list[Path]) -> list[Path]:
@@ -120,16 +161,10 @@ def run_project(
     cfg = load_config(Path(config_path))
     engine = Engine(cfg)
 
-    # ------------------------------------------------------------------
-    # Artifacts dir (shared)
-    # ------------------------------------------------------------------
     out_path = Path(out_dir)
     artifacts_dir = out_path / cfg.artifacts_subdir
     artifacts_dir.mkdir(parents=True, exist_ok=True)
 
-    # ------------------------------------------------------------------
-    # Load project + network
-    # ------------------------------------------------------------------
     snapshots = load_project(project_root)
 
     network_links: list[NetworkLinkSnapshot] = list(snapshots.network_links)
@@ -151,9 +186,7 @@ def run_project(
         compiled_links,
     )
 
-    # ------------------------------------------------------------------
-    # EPIC-04.01 — Load aggregation
-    # ------------------------------------------------------------------
+    # EPIC-04.01
     load_report = LoadAggregationService.aggregate(
         boards_by_name=cast(dict[str, dict[str, Any]], snapshots.boards_by_name),
         compiled_links=cast(list[dict[str, Any]], compiled_links),
@@ -171,9 +204,7 @@ def run_project(
     )
     load_md_path.write_text(load_md, encoding="utf-8")
 
-    # ------------------------------------------------------------------
-    # EPIC-04.02 — DAG report
-    # ------------------------------------------------------------------
+    # EPIC-04.02
     dag_report = DirectedElectricalGraphService.build_report(
         compiled_links=cast(list[dict[str, Any]], compiled_links),
         in_service_boards=set(reg.in_service_boards),
@@ -188,11 +219,8 @@ def run_project(
     dag_json_path.write_text(json.dumps(dag_report, indent=2, ensure_ascii=False), encoding="utf-8")
     dag_md_path.write_text(dag_md, encoding="utf-8")
 
-    # ------------------------------------------------------------------
-    # EPIC-04.03 — Nominal tables + overlay diff (AUTO overlays, non-blocking)
-    # ------------------------------------------------------------------
+    # EPIC-04.03
     root_nominal = Path(cfg.nominal_tables_root)
-
     if cfg.nominal_overlays:
         candidates = [Path(x) for x in cfg.nominal_overlays]
     else:
@@ -231,15 +259,13 @@ def run_project(
     )
     overlay_md_path.write_text(overlay_diff_md, encoding="utf-8")
 
-    # ------------------------------------------------------------------
-    # EPIC-04.04 — Auto-sizing sugerido (Ib vs Iz + suggested section)
-    # ------------------------------------------------------------------
+    # EPIC-04.04
     vll = _get_default_lv_vll(cfg)
+    reserve_pct = _get_cable_reserve_pct(cfg)
 
     ampacity_path = root_nominal / str(cfg.nominal_tables_version) / "ampacity_aea.json"
     ampacity = AmpacityCatalog.load(ampacity_path) if ampacity_path.exists() else None
 
-    # Default mapping if wire tag cannot be parsed (safe defaults)
     default_key = AmpacityLookupKey(
         material="cobre", insulation="PVC", metodo="B2", arrangement="3x"
     )
@@ -250,6 +276,7 @@ def run_project(
         voltage_ll_v=float(vll),
         ampacity=ampacity,
         default_ampacity_key=default_key,
+        cable_reserve_pct=reserve_pct,
     )
     sizing_md = CableSizingValidationService.to_markdown(sizing_report)
 
@@ -260,19 +287,36 @@ def run_project(
     )
     sizing_md_path.write_text(sizing_md, encoding="utf-8")
 
-    # ------------------------------------------------------------------
-    # EPIC-11 precursor — PDF consolidated from artifacts
-    # ------------------------------------------------------------------
+    if ampacity is not None:
+        cable_schedule = CableScheduleService.build(
+            load_report=load_report,
+            compiled_links=cast(list[dict[str, Any]], compiled_links),
+            ampacity=ampacity,
+            voltage_ll_v=float(vll),
+            default_key=default_key,
+            cable_reserve_pct=reserve_pct,
+        )
+        cable_schedule_md = CableScheduleService.to_markdown(cable_schedule)
+    else:
+        cable_schedule = {
+            "version": "0.1",
+            "note": "ampacity_aea.json missing; cable_schedule not generated",
+        }
+        cable_schedule_md = "# Cable Schedule\n\nampacity_aea.json missing\n"
+
+    cable_json_path = artifacts_dir / "cable_schedule.json"
+    cable_md_path = artifacts_dir / "cable_schedule.md"
+    cable_json_path.write_text(
+        json.dumps(cable_schedule, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    cable_md_path.write_text(cable_schedule_md, encoding="utf-8")
+
+    # PDF
     pdf_path = artifacts_dir / "engineering_report.pdf"
     pdf_res = build_engineering_pdf(
-        project_name=project_root.name,
-        artifacts_dir=artifacts_dir,
-        out_pdf=pdf_path,
+        project_name=project_root.name, artifacts_dir=artifacts_dir, out_pdf=pdf_path
     )
 
-    # ------------------------------------------------------------------
-    # Registry snapshot + compile report
-    # ------------------------------------------------------------------
     registry_snapshot = {
         "boards": sorted(reg.boards),
         "columns": sorted([f"{b}:{c}" for (b, c) in reg.columns]),
@@ -304,9 +348,6 @@ def run_project(
         },
     }
 
-    # ------------------------------------------------------------------
-    # Payload final
-    # ------------------------------------------------------------------
     payload: dict[str, Any] = {
         "logical_ir": elecboard_ir.to_logical_ir_dict(),
         "electrical_ir": {
@@ -315,6 +356,8 @@ def run_project(
             "nominal_tables": nominal_json,
             "nominal_overlay_diff": overlay_diff,
             "sizing_report": sizing_report,
+            "cable_schedule": cable_schedule,
+            "cable_reserve_pct": reserve_pct,
             "registry_snapshot": registry_snapshot,
             "compile_report": compile_report,
             "pdf_build": {
@@ -333,6 +376,8 @@ def run_project(
                 "nominal_overlay_diff_md": str(overlay_md_path.as_posix()),
                 "sizing_report_json": str(sizing_json_path.as_posix()),
                 "sizing_report_md": str(sizing_md_path.as_posix()),
+                "cable_schedule_json": str(cable_json_path.as_posix()),
+                "cable_schedule_md": str(cable_md_path.as_posix()),
                 "engineering_report_pdf": str(pdf_path.as_posix()),
             },
         },
@@ -342,7 +387,7 @@ def run_project(
     problem = DesignProblem(
         problem_id=f"PROJECT:{project_root.name}",
         name=project_root.name,
-        description="Auto-loaded project + EPIC-04.01/04.02/04.03 + EPIC-04.04 suggested sizing + PDF",
+        description="Auto-loaded project + engineering artifacts + sizing + PDF",
         seed=cfg.default_seed,
         payload=payload,
     )
