@@ -167,3 +167,7 @@ DoD:
 - funciona offline
 - sin backend
 - reproducible desde artifacts
+
+
+
+

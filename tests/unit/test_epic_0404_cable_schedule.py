@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
-from elecgenflow.engineering.cable_schedule import CableScheduleService
+from elecgenflow.engineering.sizing.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
+from elecgenflow.engineering.sizing.cable_schedule import CableScheduleService
 
 
 def test_cable_schedule_selects_section(tmp_path: Path) -> None:

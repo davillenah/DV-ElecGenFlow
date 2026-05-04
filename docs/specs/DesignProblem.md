@@ -23,3 +23,7 @@ Se adopta `payload` como contenedor de entradas canónicas:
 - `payload.registry`: referencia a DB/JSON o snapshot mínimo de tags y componentes
 
 El motor construye el IR lógico desde estas entradas mediante un Adapter (EPIC-04.00).
+
+
+
+

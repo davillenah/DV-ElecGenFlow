@@ -84,3 +84,7 @@ All notable changes to this project will be documented in this file.
 ## [0.1.0] - 2026-04-17
 ### Added
 - EPIC-0 completado: scaffolding profesional (estructura repo + gobernanza + docs base)
+
+
+
+

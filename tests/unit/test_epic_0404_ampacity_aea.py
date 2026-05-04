@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
+from elecgenflow.engineering.sizing.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
 
 
 def test_ampacity_lookup_and_suggest(tmp_path: Path) -> None:

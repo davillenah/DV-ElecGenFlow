@@ -163,3 +163,8 @@ EPIC‑04.01 se considera aceptada cuando:
 Se prioriza la trazabilidad y auditabilidad por sobre la automatización.
 El sistema debe poder responder explícitamente:
 **“¿Por qué esto NO cumple y bajo qué norma?”**
+
+
+
+
+

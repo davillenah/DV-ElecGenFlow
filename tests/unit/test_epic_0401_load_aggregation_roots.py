@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from elecgenflow.engineering.load_aggregation import LoadAggregationService
+from elecgenflow.engineering.sizing.load_aggregation import LoadAggregationService
 
 
 def test_root_totals_multiple_roots_sum_to_system_total() -> None:

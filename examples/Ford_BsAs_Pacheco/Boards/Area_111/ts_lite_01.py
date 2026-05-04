@@ -16,3 +16,7 @@ def build():
         .add_circuit(tag="EMG", protection="MCB", load="1200W", type="lite", phases=1, desc="Emergencia")
         .build("Schneider Electric")
     )
+
+
+
+

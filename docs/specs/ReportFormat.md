@@ -5,3 +5,8 @@ EPIC-2 define ReportArtifacts:
 - Referencia por path o contenido embebido
 
 Reporting ingenieril completo se implementa en **EPIC-11**.
+
+
+
+
+

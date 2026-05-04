@@ -7,8 +7,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
-from elecgenflow.engineering.nominal_tables import NominalLookupError, NominalTables
+from elecgenflow.engineering.sizing.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
+from elecgenflow.engineering.sizing.nominal_tables import NominalLookupError, NominalTables
 
 
 @dataclass(frozen=True)

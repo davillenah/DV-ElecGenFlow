@@ -22,3 +22,8 @@
 - [ ] BACKLOG actualizado
 - [ ] ADR agregado/actualizado si aplica
 - [ ] No se asumieron datos eléctricos críticos sin declarar
+
+
+
+
+

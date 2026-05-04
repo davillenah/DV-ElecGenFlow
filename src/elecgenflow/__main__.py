@@ -28,7 +28,14 @@ def main() -> int:
 
     parser.add_argument("--problem", type=str, help="Path to DesignProblem JSON file")
     parser.add_argument("--project", type=str, help="Path to Project/ folder (auto-discovery)")
-    parser.add_argument("--out", type=str, default="out", help="Output folder for artifacts")
+
+    # ✅ CAMBIO: por defecto, en modo --project queremos escribir dentro del proyecto
+    parser.add_argument(
+        "--out",
+        type=str,
+        default="Reports",
+        help="Output folder (relative to project when using --project). Default: Reports",
+    )
 
     args = parser.parse_args()
 

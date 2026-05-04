@@ -55,7 +55,6 @@ def _json_safe(obj: Any) -> Any:
         return {str(k): _json_safe(v) for k, v in obj.items()}
     if isinstance(obj, (list, tuple, set)):
         return [_json_safe(v) for v in obj]
-    # Enums
     v = getattr(obj, "value", None)
     if v is not None and not isinstance(obj, (str, int, float, bool)):
         return _json_safe(v)
@@ -65,8 +64,18 @@ def _json_safe(obj: Any) -> Any:
 def _infer_project_root(problem: DesignProblem) -> Path:
     """
     Best-effort: intenta obtener project root desde el problema.
-    Si no existe, usa cwd y valida que exista Plant/Boards.
+    Orden:
+      1) payload["project_root"] si existe
+      2) attrs project_root/project_dir/project_path si existen
+      3) fallback cwd
     """
+    try:
+        pr = problem.payload.get("project_root")
+        if isinstance(pr, str) and pr:
+            return Path(pr)
+    except Exception:
+        pass
+
     for attr in ("project_root", "project_dir", "project_path"):
         v = getattr(problem, attr, None)
         if isinstance(v, str) and v:
@@ -75,7 +84,8 @@ def _infer_project_root(problem: DesignProblem) -> Path:
     cwd = Path.cwd()
     if (cwd / "Plant" / "Boards").exists():
         return cwd
-    # fallback común
+    if (cwd / "Boards").exists():
+        return cwd
     if (cwd / "MyProject" / "Plant" / "Boards").exists():
         return cwd / "MyProject"
     return cwd
@@ -110,7 +120,6 @@ class Engine:
             problem.standards,
         )
 
-        # Manifest para trazabilidad.
         config_path = Path("configs/default_ar.yaml")
         config_text = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
         problem_text = problem.model_dump_json(indent=2)
@@ -120,7 +129,6 @@ class Engine:
         manifest_path = artifacts_dir / "run_manifest.json"
         manifest.write(manifest_path)
 
-        # Candidate stub (EPIC-1)
         candidate = DesignCandidate.from_problem(problem, candidate_id="CAND-0001")
 
         artifacts: dict[str, Any] = {
@@ -187,7 +195,6 @@ class Engine:
                 sizing_message = f"Sizing skipped: {exc}"
                 logger.warning(sizing_message)
 
-        # Resultado (sigue siendo partial, pero ahora con sizing_results si salió)
         result = EngineResult(
             problem_id=problem.problem_id,
             status="partial",

@@ -64,3 +64,7 @@
 - [ ] Reporte interactivo OFF‑LINE (HTML/CSS/JS) (EPIC‑20.00)
 
 ---
+
+
+
+

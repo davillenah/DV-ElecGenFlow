@@ -156,3 +156,7 @@ El Registry es infraestructura. No debe mezclar:
 
 - **Ahora:** el JSON se documenta dentro del `.md` como schema + ejemplos (como arriba).  
 - **Después:** sí, se crean archivos reales `.json` en `data/registry/v0/` (y el loader los consume).
+
+
+
+

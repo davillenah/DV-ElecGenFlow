@@ -67,3 +67,7 @@ La EPIC‑03.00 se considerará finalizada únicamente cuando:
 
 ## 10. NOTA DE DISEÑO
 Se define el Elecboard IR como una representación previa, estable y extensible, análoga a un Árbol de Sintaxis Abstracta (AST), evitando su confusión con modelos de ejecución final como *pandapower*.
+
+
+
+

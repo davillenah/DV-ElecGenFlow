@@ -8,3 +8,8 @@
 
 ## Regla crítica
 No asumir datos eléctricos sin validación explícita.
+
+
+
+
+

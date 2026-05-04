@@ -1,3 +1,5 @@
+# src/electro_core/network.py
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -52,6 +54,7 @@ class WireConfig:
     # buried conditions (optional for D1/D2, etc.)
     buried_depth_m: float | None = None
 
+    # meta: aquí guardamos agrupamiento / paralelos / arrangement / etc.
     meta: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -97,6 +100,7 @@ class NetworkLink:
                 "terminal": self.destination.terminal,
                 "load": self.destination.load,
             },
+            # wire legacy: el pipeline actual usa lk["wire"] como identificador visible
             "wire": self.wire or self.wire_tag or self.wire_id or "",
             "wire_id": self.wire_id,
             "wire_config": self.wire_config.to_dict(),
@@ -269,12 +273,30 @@ class WireConfigBuilder:
         self._p._wire_cfg.conductor = conductor
         return self
 
+    # ✅ aliases “cómodos” (como tu ejemplo Ford)
+    def insulation(self, insulation: Insulation) -> WireConfigBuilder:
+        return self.with_insulation(insulation)
+
+    def conductor(self, conductor: Conductor) -> WireConfigBuilder:
+        return self.with_conductor(conductor)
+
     def installed_in(self, method: InstallMethod) -> WireConfigBuilder:
         self._p._wire_cfg.install_method = method
         return self
 
     def buried_at(self, *, depth_m: float) -> WireConfigBuilder:
         self._p._wire_cfg.buried_depth_m = float(depth_m)
+        return self
+
+    def circuits(self, *, parallel: int = 1, grouped: int = 1) -> WireConfigBuilder:
+        """
+        parallel: cantidad de ternas/cables en paralelo para ESTE MISMO feeder.
+        grouped: cantidad de circuitos cargados en una misma canalización.
+        """
+        p = int(parallel) if int(parallel) >= 1 else 1
+        g = int(grouped) if int(grouped) >= 1 else 1
+        self._p._wire_cfg.meta["parallel"] = p
+        self._p._wire_cfg.meta["grouped"] = g
         return self
 
     def meta(self, **kwargs: Any) -> WireConfigBuilder:

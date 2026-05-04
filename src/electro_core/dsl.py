@@ -1,3 +1,5 @@
+# src/electro_core/dsl.py
+
 from __future__ import annotations
 
 import re
@@ -6,13 +8,19 @@ from typing import Any, Literal
 
 
 def parse_power(value: str | None) -> dict[str, Any]:
+    """
+    Parse simple de potencia. Devuelve un dict trazable:
+      - si matchea: {"value": float, "unit": "kVA|VA|MVA|kW|W|MW|HP"}
+      - si no matchea: {"raw": value}
+    """
     if value is None:
         return {"value": 0.0, "unit": "kVA"}
 
     s = str(value).strip().replace(" ", "")
-    m = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*(kW|kVA|W|VA)$", s, re.IGNORECASE)
+    m = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*(kW|kVA|W|VA|MW|MVA|HP)$", s, re.IGNORECASE)
     if not m:
         return {"raw": value}
+
     return {"value": float(m.group(1)), "unit": str(m.group(2))}
 
 
@@ -33,6 +41,8 @@ class EndpointDecl:
 @dataclass
 class SubCircuitIR:
     tag: str
+    type: str
+    phases: int | None
     load: dict[str, Any]
     protection: str
     desc: str = ""
@@ -42,6 +52,7 @@ class SubCircuitIR:
 class CircuitIR:
     tag: str
     type: str
+    phases: int | None
     load: dict[str, Any]
     desc: str = ""
     protection: str = ""
@@ -88,6 +99,8 @@ class BoardIR:
     endpoints: list[EndpointDecl] = field(default_factory=list)
     catalog: Any = None
 
+    meta: dict[str, Any] = field(default_factory=dict)
+
 
 class Board:
     ENTRYPOINT_MAIN_PROT_TAG = "IG"
@@ -99,10 +112,39 @@ class Board:
     def create(name: str) -> Board:
         return Board(name)
 
-    def configured_as(self, system: str, *, voltage: str, freq: int) -> Board:
-        self._ir.system = system
+    # ✅ alias: Board.id("TS-CRITICOS")
+    @staticmethod
+    def id(name: str) -> Board:
+        return Board.create(name)
+
+    def configured_as(
+        self,
+        system: str | None = None,
+        *,
+        phases: int | None = None,
+        voltage: str,
+        freq: int,
+        grounding_system: str | None = None,
+    ) -> Board:
+        """
+        Compat + nuevo formato:
+          - viejo: configured_as("TRIFASICO", voltage="380/220V", freq=50)
+          - nuevo: configured_as(phases=3, voltage="380/220V", freq=50, grounding_system="TT")
+        """
+        if system is not None:
+            self._ir.system = system
+
+        if phases is not None:
+            p = int(phases)
+            self._ir.meta["phases"] = p
+            self._ir.system = "TRIFASICO" if p == 3 else "MONOFASICO"
+
         self._ir.voltage = voltage
-        self._ir.freq = freq
+        self._ir.freq = int(freq)
+
+        if grounding_system is not None:
+            self._ir.grounding = grounding_system
+
         return self
 
     def grounding_system(self, grounding: str) -> Board:
@@ -120,17 +162,19 @@ class Board:
     def main_protection(self, prot: Any) -> Board:
         if isinstance(prot, dict):
             self._ir.main_protection = prot
+            kind = str(prot.get("kind", "PROT"))
         else:
             self._ir.main_protection = {
                 "kind": prot.__class__.__name__,
                 **getattr(prot, "__dict__", {}),
             }
+            kind = prot.__class__.__name__
 
         self._register_endpoint(
             role="entrypoint",
             kind="protection",
             tag=self.ENTRYPOINT_MAIN_PROT_TAG,
-            prot_type=str(prot.__class__.__name__),
+            prot_type=kind,
             source="main_protection",
         )
         return self
@@ -209,8 +253,16 @@ class BusBuilder:
         load: str | None = None,
         desc: str = "",
         protection: str = "",
+        phases: int | None = None,
     ) -> BusBuilder | CircuitGroupBuilder:
-        c = CircuitIR(tag=tag, type=type, load=parse_power(load), desc=desc, protection=protection)
+        c = CircuitIR(
+            tag=tag,
+            type=type,
+            phases=phases,
+            load=parse_power(load),
+            desc=desc,
+            protection=protection,
+        )
         self._bus.circuits.append(c)
 
         if protection:
@@ -220,7 +272,10 @@ class BusBuilder:
                 tag=str(tag),
                 prot_type=str(protection),
                 source="circuit",
-                meta={"circuit_type": type},
+                meta={
+                    "circuit_type": type,
+                    "phases": str(phases) if phases is not None else "",
+                },
             )
 
         if type.lower() in ("hvac", "group", "panel", "parent"):
@@ -248,8 +303,18 @@ class CircuitGroupBuilder:
         load: str | None = None,
         protection: str,
         desc: str = "",
+        type: str | None = None,  # noqa: A002
+        phases: int | None = None,
     ) -> CircuitGroupBuilder:
-        sc = SubCircuitIR(tag=tag, load=parse_power(load), protection=protection, desc=desc)
+        sc_type = type if type is not None else self._circuit.type
+        sc = SubCircuitIR(
+            tag=tag,
+            type=sc_type,
+            phases=phases,
+            load=parse_power(load),
+            protection=protection,
+            desc=desc,
+        )
         self._circuit.subcircuits.append(sc)
 
         parent_tag = str(self._circuit.tag)
@@ -262,7 +327,11 @@ class CircuitGroupBuilder:
                 tag=full_tag,
                 prot_type=str(protection),
                 source="subcircuit",
-                meta={"parent": parent_tag},
+                meta={
+                    "parent": parent_tag,
+                    "type": sc_type,
+                    "phases": str(phases) if phases is not None else "",
+                },
             )
 
         return self
@@ -307,9 +376,14 @@ class RCCB:
         self,
         *,
         type: str,  # noqa: A002
-        sensitivity: str,
+        sensitivity_mA: int | None = None,  # noqa: N803
+        sensitivity: str | None = None,
         selective: bool = False,
     ) -> None:
         self.type = type
-        self.sensitivity = sensitivity
+        # compat: permitir sensitivity="300mA" o sensitivity_mA=300
+        if sensitivity is None and sensitivity_mA is not None:
+            self.sensitivity = f"{int(sensitivity_mA)}mA"
+        else:
+            self.sensitivity = sensitivity or ""
         self.selective = selective

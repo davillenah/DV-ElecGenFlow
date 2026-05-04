@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from elecgenflow.engineering.nominal_tables import (
+from elecgenflow.engineering.sizing.nominal_tables import (
     NominalLookupError,
     load_nominal_tables,
     nominal_overlay_diff,

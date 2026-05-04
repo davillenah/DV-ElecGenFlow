@@ -4,25 +4,25 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
-
-from src.elecgenflow.engineering.sizing.load_aggregation import LoadAggregationService
-from src.elecgenflow.engineering.sizing.sizing_validation import CableSizingValidationService
 
 from elecgenflow.core.config import load_config
 from elecgenflow.core.engine import Engine
 from elecgenflow.domain.contracts.problem import DesignProblem
-from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
-from elecgenflow.engineering.cable_schedule import CableScheduleService
 from elecgenflow.engineering.directed_graph import DirectedElectricalGraphService
-from elecgenflow.engineering.nominal_tables import (
+from elecgenflow.engineering.sizing.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
+from elecgenflow.engineering.sizing.cable_schedule import CableScheduleService
+from elecgenflow.engineering.sizing.load_aggregation import LoadAggregationService
+from elecgenflow.engineering.sizing.nominal_tables import (
     load_nominal_tables,
     nominal_overlay_diff,
     nominal_overlay_diff_md,
     nominal_snapshot,
     nominal_snapshot_md,
 )
+from elecgenflow.engineering.sizing.sizing_validation import CableSizingValidationService
 from elecgenflow.ingest.dsl_adapter import build_elecboard_ir
 from elecgenflow.ingest.import_utils import call_if_exists, import_module_from_path
 from elecgenflow.ingest.network_compiler import compile_network
@@ -33,6 +33,31 @@ from elecgenflow.reporting.pdf_report import build_engineering_pdf
 from electro_core.network import Network
 
 logger = logging.getLogger(__name__)
+
+
+def _make_run_id() -> str:
+    return datetime.now(timezone.utc).strftime("run_%Y%m%d_%H%M%SUTC")
+
+
+def _resolve_project_out_dir(project_root: Path, out_dir: str) -> Path:
+    """
+    En modo --project:
+      - si out_dir es absoluto => <out_dir>/<run_id>
+      - si out_dir es relativo  => <project_root>/<out_dir>/<run_id>
+
+    Ejemplo deseado:
+      <project_root>/Reports/run_YYYYMMDD_HHMMSSUTC/
+        engineering_report.pdf
+        engine_result.json
+        artifacts/
+    """
+    run_id = _make_run_id()
+    out_path = Path(out_dir)
+
+    if out_path.is_absolute():
+        return out_path / run_id
+
+    return project_root / out_path / run_id
 
 
 def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSnapshot]:
@@ -56,12 +81,9 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
             origin = lk.origin
             dest = lk.destination
 
-            # Compat + nuevo DSL:
             wire_id = getattr(lk, "wire_id", None)
             wire_tag = getattr(lk, "wire_tag", None)
             wire_legacy = getattr(lk, "wire", None)
-
-            # Esto asegura que siempre haya "wire" para el pipeline existente
             wire_value = wire_legacy or wire_tag or wire_id or ""
 
             wire_config_obj = getattr(lk, "wire_config", None)
@@ -71,7 +93,6 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
                 else {}
             )
 
-            # ✅ Base snapshot (TypedDict safe)
             snap: NetworkLinkSnapshot = {
                 "origin": {
                     "board": cast(Any, origin.board),
@@ -90,7 +111,6 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
                 "meta": getattr(lk, "meta", {}) or {},
             }
 
-            # ✅ Add optional keys only when valid (fix mypy)
             if isinstance(wire_id, str) and wire_id:
                 snap["wire_id"] = wire_id
             if isinstance(wire_config, dict) and wire_config:
@@ -105,10 +125,6 @@ def _runtime_links_from_network_module(network_file: str) -> list[NetworkLinkSna
 
 
 def _get_default_lv_vll(cfg: Any) -> float:
-    """
-    Usa cfg.voltages.lv[0] si existe (ej: voltages.lv: [380, 220]).
-    Fallback: 380.
-    """
     try:
         volts = getattr(cfg, "voltages", None)
         if volts is not None:
@@ -121,11 +137,6 @@ def _get_default_lv_vll(cfg: Any) -> float:
 
 
 def _get_cable_reserve_pct(cfg: Any) -> float:
-    """
-    Reserva (%) para el cable.
-    Agregar en YAML:
-      cable_reserve_pct: 15
-    """
     try:
         v = getattr(cfg, "cable_reserve_pct", 0.0)
         return float(v)
@@ -154,14 +165,18 @@ def _filter_valid_overlays(candidates: list[Path]) -> list[Path]:
 def run_project(
     project_path: str,
     *,
-    out_dir: str = "out",
+    out_dir: str = "Reports",
     config_path: str = "configs/default_ar.yaml",
 ) -> None:
     project_root = Path(project_path)
     cfg = load_config(Path(config_path))
     engine = Engine(cfg)
 
-    out_path = Path(out_dir)
+    # ✅ run folder: <project>/Reports/run_YYYYMMDD_...UTC/
+    out_path = _resolve_project_out_dir(project_root, out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    # ✅ artifacts folder: <run>/artifacts/
     artifacts_dir = out_path / cfg.artifacts_subdir
     artifacts_dir.mkdir(parents=True, exist_ok=True)
 
@@ -311,8 +326,8 @@ def run_project(
     )
     cable_md_path.write_text(cable_schedule_md, encoding="utf-8")
 
-    # PDF
-    pdf_path = artifacts_dir / "engineering_report.pdf"
+    # ✅ PDF EN RAÍZ DEL RUN (como pediste)
+    pdf_path = out_path / "engineering_report.pdf"
     pdf_res = build_engineering_pdf(
         project_name=project_root.name, artifacts_dir=artifacts_dir, out_pdf=pdf_path
     )
@@ -349,6 +364,7 @@ def run_project(
     }
 
     payload: dict[str, Any] = {
+        "project_root": str(project_root.as_posix()),
         "logical_ir": elecboard_ir.to_logical_ir_dict(),
         "electrical_ir": {
             "load_report": load_report,
@@ -362,7 +378,7 @@ def run_project(
             "compile_report": compile_report,
             "pdf_build": {
                 "enabled": pdf_res.enabled,
-                "pdf_path": pdf_res.pdf_path,
+                "pdf_path": str(pdf_path.as_posix()),
                 "reason": pdf_res.reason,
             },
             "artifacts": {
@@ -392,4 +408,5 @@ def run_project(
         payload=payload,
     )
 
+    # ✅ Engine.run ahora debe escribir engine_result.json en la raíz del run (ver engine.py)
     engine.run(problem, out_dir=out_path)

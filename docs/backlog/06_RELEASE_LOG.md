@@ -41,3 +41,7 @@
 - PDF precursor: mejora de estructura técnica (memoria + anexos).
 - Derating defaults JSON agregado (base para k_group/k_temp/k_soil).
 - Refactors de imports con compat shims para estabilidad de CI.
+
+
+
+

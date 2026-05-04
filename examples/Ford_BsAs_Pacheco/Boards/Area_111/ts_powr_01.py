@@ -16,3 +16,7 @@ def build():
         .add_circuit(tag="A1", protection="MCB", load="5kVA", type="generic", phases=1, desc="Aux 1φ")
         .build("Schneider Electric")
     )
+
+
+
+

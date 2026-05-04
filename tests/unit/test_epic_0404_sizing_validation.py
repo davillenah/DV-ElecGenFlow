@@ -3,9 +3,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from elecgenflow.engineering.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
-from elecgenflow.engineering.nominal_tables import NominalTables
-from elecgenflow.engineering.sizing_validation import CableSizingValidationService
+from elecgenflow.engineering.sizing.ampacity_aea import AmpacityCatalog, AmpacityLookupKey
+from elecgenflow.engineering.sizing.nominal_tables import NominalTables
+from elecgenflow.engineering.sizing.sizing_validation import CableSizingValidationService
 
 
 def test_sizing_suggests_section_when_fail(tmp_path: Path) -> None:

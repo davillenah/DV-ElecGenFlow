@@ -62,9 +62,7 @@ def build_wire_spec_from_link(
         cable_form = (
             CableForm.MULTIPOLAR
             if s in ("MULTIPOLAR", "MULTI", "TRUE")
-            else CableForm.UNIPOLAR
-            if s in ("UNIPOLAR", "UNI")
-            else CableForm.MULTIPOLAR
+            else CableForm.UNIPOLAR if s in ("UNIPOLAR", "UNI") else CableForm.MULTIPOLAR
         )
 
     insulation = _norm_insulation(cfg.get("insulation", "PVC"))

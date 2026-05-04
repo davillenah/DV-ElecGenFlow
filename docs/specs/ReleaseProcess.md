@@ -9,3 +9,8 @@ Criterio mínimo para release:
 - CHANGELOG actualizado
 - CHECKLIST coherente
 - BACKLOG actualizado
+
+
+
+
+

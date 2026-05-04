@@ -156,3 +156,7 @@
 - Requerimientos:
   - Bundle offline navegable (archivos estáticos).
   - Visualizaciones interactivas (DAG/unifilar).
+
+
+
+

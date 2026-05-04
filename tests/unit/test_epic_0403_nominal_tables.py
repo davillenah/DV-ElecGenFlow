@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from elecgenflow.engineering.nominal_tables import load_nominal_tables
+from elecgenflow.engineering.sizing.nominal_tables import load_nominal_tables
 
 
 def test_nominal_tables_load_base_ok(tmp_path: Path) -> None:

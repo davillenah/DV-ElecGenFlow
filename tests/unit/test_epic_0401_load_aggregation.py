@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from elecgenflow.engineering.load_aggregation import LoadAggregationService
+from elecgenflow.engineering.sizing.load_aggregation import LoadAggregationService
 
 
 def test_load_aggregation_simple_chain_no_duplication() -> None:

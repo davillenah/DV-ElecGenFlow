@@ -98,3 +98,7 @@
 - v0.4.3+: EPIC-11 precursor — PDF desde artifacts (`engineering_report.pdf`)
 
 Próximo paso: EPIC‑04.04+ — coordinación Ib/In/Iz (protección), derating completo (k_group/k_temp/k_soil) y caída de tensión inicial.
+
+
+
+

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from elecgenflow.engineering.load_aggregation import LoadAggregationService
+from elecgenflow.engineering.sizing.load_aggregation import LoadAggregationService
 
 
 def test_load_conversion_hp_to_kw_and_kva() -> None:

@@ -58,3 +58,7 @@ contra este Registry generado dinámicamente.
 - Network DSL se mantiene manual y explícita:
   - Por ahora se usa `.protection("<TAG>")` y no se automatiza el entrypoint.
 - Terminales quedan habilitados para tableros de control en un sprint posterior.
+
+
+
+
